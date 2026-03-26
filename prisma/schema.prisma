@@ -1,0 +1,545 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Usuários / Corretores ────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          UserRole  @default(AGENT)
+  phone         String?
+  whatsapp      String?
+  creci         String?
+  bio           String?
+  avatarUrl     String?
+  company       String?
+  companyCreci  String?
+  instagram     String?
+  facebook      String?
+  linkedin      String?
+  youtube       String?
+  telegram      String?
+  twitter       String?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  properties    Property[]
+  leads         Lead[]
+  activities    Activity[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  AGENT
+}
+
+// ─── Imóveis ──────────────────────────────────────────────────────────────────
+
+model Property {
+  id                    String            @id @default(cuid())
+  ref                   String            @unique
+  slug                  String            @unique
+
+  purpose               PropertyPurpose   @default(RESIDENTIAL)
+  transactionType       TransactionType   @default(SALE)
+  location              LocationType      @default(BRAZIL)
+
+  status                PropertyStatus    @default(DRAFT)
+  contractType          ContractType?
+  registrationDate      DateTime          @default(now())
+  expiryDate            DateTime?
+  hideOnSite            Boolean           @default(false)
+
+  propertyType          String?
+  marketStatus          String?
+  condition             String?
+  category              String?
+  landUse               String?
+  availabilityDate      DateTime?
+  constructionYear      Int?
+
+  price                 Decimal?          @db.Decimal(15, 2)
+  priceType             PriceType?
+  pricePerSqm           Decimal?          @db.Decimal(10, 2)
+  hidePrice             Boolean           @default(false)
+  iptu                  Decimal?          @db.Decimal(10, 2)
+  iptuPeriod            String?
+  condominiumFee        Decimal?          @db.Decimal(10, 2)
+  condominiumFeePeriod  String?
+
+  captureCommissionPct  Decimal?          @db.Decimal(5, 2)
+  captureCommissionAmt  Decimal?          @db.Decimal(10, 2)
+  captureCommissionType CommissionType    @default(PERCENTAGE)
+  saleCommissionPct     Decimal?          @db.Decimal(5, 2)
+  saleCommissionAmt     Decimal?          @db.Decimal(10, 2)
+  saleCommissionType    CommissionType    @default(PERCENTAGE)
+
+  iptuRegistration      String?
+  registryNumber        String?
+  financialNotes        String?
+
+  totalArea             Decimal?          @db.Decimal(10, 2)
+  usefulArea            Decimal?          @db.Decimal(10, 2)
+  landArea              Decimal?          @db.Decimal(10, 2)
+  cubicVolume           Decimal?          @db.Decimal(10, 2)
+  landDimensionWidth    Decimal?          @db.Decimal(10, 2)
+  landDimensionLength   Decimal?          @db.Decimal(10, 2)
+  floors                Int?
+  unitsInBuilding       Int?
+  maxOccupancy          Int?
+  totalParkingSpots     Int?
+  plateRestriction      Boolean           @default(false)
+
+  parkingSpots          ParkingSpot[]
+
+  environments          Int?              @default(0)
+  bedrooms              Int?              @default(0)
+  bathrooms             Int?              @default(0)
+  suites                Int?              @default(0)
+  rooms                 Room[]
+
+  zipCode               String?
+  address               String?
+  number                String?
+  complement            String?
+  landmark              String?
+  neighborhood          String?
+  commercialNeighborhood String?
+  city                  String?
+  state                 String?
+  region                String?
+  floor                 String?
+  buildingFloors        Int?
+  latitude              Decimal?          @db.Decimal(10, 7)
+  longitude             Decimal?          @db.Decimal(10, 7)
+  showFullAddress       Boolean           @default(false)
+  keyNumber             String?
+
+  title                 String?
+  description           String?           @db.Text
+  marketingDescription  String?           @db.Text
+  surroundingsInfo      String?           @db.Text
+  titleEn               String?
+  descriptionEn         String?           @db.Text
+
+  features              PropertyFeature[]
+  lifestyles            PropertyLifestyle[]
+
+  condominiumId         String?
+  condominium           Condominium?      @relation(fields: [condominiumId], references: [id])
+
+  ownerId               String?
+  owner                 Contact?          @relation(fields: [ownerId], references: [id])
+  ownerName             String?
+
+  agentId               String
+  agent                 User              @relation(fields: [agentId], references: [id])
+  secondaryAgentId      String?
+
+  portals               PropertyPortal[]
+  additionalFees        AdditionalFee[]
+
+  images                PropertyImage[]
+  videos                PropertyVideo[]
+  documents             PropertyDocument[]
+  virtualTourType       VirtualTourType   @default(NONE)
+  virtualTourUrl        String?
+  externalLink          String?
+
+  marketAnalyses        MarketAnalysis[]
+  leads                 Lead[]
+  activities            Activity[]
+
+  views                 Int               @default(0)
+  favorites             Int               @default(0)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  publishedAt           DateTime?
+
+  @@index([status, transactionType, purpose])
+  @@index([city, state])
+  @@index([price])
+  @@index([slug])
+  @@map("properties")
+}
+
+enum PropertyPurpose {
+  RESIDENTIAL
+  COMMERCIAL
+}
+
+enum TransactionType {
+  SALE
+  RENT
+}
+
+enum LocationType {
+  BRAZIL
+  ABROAD
+}
+
+enum PropertyStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  RENTED
+  INACTIVE
+  SUSPENDED
+}
+
+enum ContractType {
+  EXCLUSIVE
+  OPEN
+  AUTHORIZATION
+}
+
+enum PriceType {
+  FIXED
+  ON_REQUEST
+  NEGOTIABLE
+}
+
+enum CommissionType {
+  PERCENTAGE
+  AMOUNT
+}
+
+enum VirtualTourType {
+  NONE
+  BANIB
+  OTHER
+}
+
+model ParkingSpot {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  quantity     Int       @default(0)
+  type         String?
+  @@map("parking_spots")
+}
+
+model Room {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name         String
+  area         Decimal?  @db.Decimal(8, 2)
+  description  String?
+  @@map("rooms")
+}
+
+model PropertyFeature {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  feature      FeatureType
+  @@unique([propertyId, feature])
+  @@map("property_features")
+}
+
+enum FeatureType {
+  POOL
+  GARDEN
+  GARAGE
+  JACUZZI
+  SOLAR_HEATING
+  ACCEPTS_PETS
+  INDIVIDUAL_GAS_METER
+  WHEELCHAIR_ACCESSIBLE
+  GOURMET_BALCONY
+  BARBECUE
+  ELEVATOR
+  GYM
+  PARTY_ROOM
+  PLAYGROUND
+  SAUNA
+  SECURITY_24H
+  INTERCOM
+  ALARM
+  GENERATOR
+  FURNISHED
+  SEMI_FURNISHED
+  AIR_CONDITIONING
+  WOOD_FLOOR
+  CERAMIC_FLOOR
+  MARBLE_FLOOR
+}
+
+model PropertyLifestyle {
+  id           String        @id @default(cuid())
+  propertyId   String
+  property     Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  lifestyle    LifestyleType
+  @@unique([propertyId, lifestyle])
+  @@map("property_lifestyles")
+}
+
+enum LifestyleType {
+  RETIREMENT
+  WATER_SPRING
+  BEACH
+  GOLF
+  INVESTMENT
+  METROPOLIS
+  RANCH
+  SKI_RESORT
+  HOT_CLIMATE
+  COUNTRYSIDE
+}
+
+model AdditionalFee {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name         String
+  value        Decimal   @db.Decimal(10, 2)
+  period       String?
+  @@map("additional_fees")
+}
+
+// ─── Imagens ──────────────────────────────────────────────────────────────────
+
+model PropertyImage {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url          String
+  thumbnailUrl String?
+  alt          String?
+  caption      String?
+  order        Int       @default(0)
+  is360        Boolean   @default(false)
+  isPanoramic  Boolean   @default(false)
+  isCover      Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  @@map("property_images")
+}
+
+model PropertyVideo {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  youtubeUrl   String?
+  platform     String?
+  @@map("property_videos")
+}
+
+model PropertyDocument {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name         String
+  url          String
+  type         String?
+  size         Int?
+  isPublic     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  @@map("property_documents")
+}
+
+// ─── Portais ──────────────────────────────────────────────────────────────────
+
+model PropertyPortal {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  portalName   String
+  active       Boolean   @default(false)
+  externalId   String?
+  publishedAt  DateTime?
+  @@unique([propertyId, portalName])
+  @@map("property_portals")
+}
+
+// ─── Contatos / CRM ───────────────────────────────────────────────────────────
+
+model Contact {
+  id            String        @id @default(cuid())
+  name          String
+  email         String?
+  phone         String?
+  whatsapp      String?
+  cpf           String?       @unique
+  type          ContactType   @default(CLIENT)
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  ownedProperties Property[]
+  leads           Lead[]
+
+  @@map("contacts")
+}
+
+enum ContactType {
+  CLIENT
+  OWNER
+  PARTNER
+  INVESTOR
+}
+
+model Lead {
+  id           String      @id @default(cuid())
+  propertyId   String?
+  property     Property?   @relation(fields: [propertyId], references: [id])
+  contactId    String?
+  contact      Contact?    @relation(fields: [contactId], references: [id])
+  agentId      String?
+  agent        User?       @relation(fields: [agentId], references: [id])
+  name         String
+  email        String?
+  phone        String?
+  message      String?     @db.Text
+  source       LeadSource  @default(SITE)
+  status       LeadStatus  @default(NEW)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("leads")
+}
+
+enum LeadSource {
+  SITE
+  WHATSAPP
+  PORTAL
+  REFERRAL
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  CLOSED
+  LOST
+}
+
+// ─── Condomínios/Empreendimentos ──────────────────────────────────────────────
+
+model Condominium {
+  id           String      @id @default(cuid())
+  name         String
+  address      String?
+  city         String?
+  state        String?
+  zipCode      String?
+  properties   Property[]
+  @@map("condominiums")
+}
+
+// ─── Análise de Mercado ───────────────────────────────────────────────────────
+
+model MarketAnalysis {
+  id                   String    @id @default(cuid())
+  propertyId           String
+  property             Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  generatedAt          DateTime  @default(now())
+  status               AnalysisStatus @default(PENDING)
+
+  optimisticValue      Decimal?  @db.Decimal(15, 2)
+  marketValue          Decimal?  @db.Decimal(15, 2)
+  competitiveValue     Decimal?  @db.Decimal(15, 2)
+
+  pricePositioning     String?
+  marketDemand         String?
+  absoptionTime        Int?
+
+  comparables          Json?
+  priceHistory         Json?
+
+  aiSummary            String?   @db.Text
+  aiStrengths          Json?
+  aiWeaknesses         Json?
+  aiOpportunities      Json?
+  aiRecommendations    Json?
+
+  avgPricePerSqmRegion Decimal?  @db.Decimal(10, 2)
+  priceVariation30d    Decimal?  @db.Decimal(5, 2)
+  priceVariation90d    Decimal?  @db.Decimal(5, 2)
+  totalListings        Int?
+
+  rawData              Json?
+
+  @@map("market_analyses")
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ─── Atividades ───────────────────────────────────────────────────────────────
+
+model Activity {
+  id           String        @id @default(cuid())
+  propertyId   String?
+  property     Property?     @relation(fields: [propertyId], references: [id])
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  type         ActivityType
+  description  String
+  metadata     Json?
+  createdAt    DateTime      @default(now())
+
+  @@map("activities")
+}
+
+enum ActivityType {
+  PROPERTY_CREATED
+  PROPERTY_UPDATED
+  PROPERTY_PUBLISHED
+  PROPERTY_SOLD
+  LEAD_RECEIVED
+  LEAD_CONTACTED
+  VISIT_SCHEDULED
+  VISIT_DONE
+  DOCUMENT_ADDED
+  IMAGE_ADDED
+  ANALYSIS_GENERATED
+  NOTE_ADDED
+}
+
+// ─── Configurações do Site ────────────────────────────────────────────────────
+
+model SiteConfig {
+  id              String    @id @default(cuid())
+  ownerName       String    @default("Paulo Pop")
+  ownerPhotoUrl   String?
+  ownerCreci      String?
+  ownerBio        String?   @db.Text
+  ownerWhatsapp   String?
+  ownerPhone      String?
+  ownerEmail      String?
+  ownerInstagram  String?
+  ownerFacebook   String?
+  ownerLinkedin   String?
+  ownerYoutube    String?
+  ownerTelegram   String?
+  ownerCompany    String?
+  ownerAddress    String?
+  metaTitle       String?
+  metaDescription String?
+  heroTitle       String?
+  heroSubtitle    String?
+  heroBgUrl       String?
+  footerText      String?
+  whatsappMessage String?
+  updatedAt       DateTime  @updatedAt
+
+  @@map("site_config")
+}
