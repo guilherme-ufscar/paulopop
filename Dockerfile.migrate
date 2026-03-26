@@ -1,0 +1,11 @@
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+COPY tsconfig.json ./
+COPY src/lib/seed.ts ./src/lib/seed.ts
+RUN npx prisma generate
+CMD ["sh", "-c", "npx prisma migrate deploy && npx ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"]
