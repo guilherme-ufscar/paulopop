@@ -2,8 +2,10 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Printer, X, Save, CheckCircle } from 'lucide-react'
+import { Printer, X, Save, CheckCircle, Megaphone, FileText, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { MarketingPlanModal } from '@/components/admin/MarketingPlanModal'
+import { ContractModal } from '@/components/admin/ContractModal'
 import { TabPrincipal } from './TabPrincipal'
 import { TabDescricao } from './TabDescricao'
 import { TabImagensVideos } from './TabImagensVideos'
@@ -42,6 +44,8 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
   const [data, setData] = useState<Record<string, unknown>>(initialData)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [showMarketingModal, setShowMarketingModal] = useState(false)
+  const [showContractModal, setShowContractModal] = useState(false)
 
   // Switches do cabeçalho
   const [transactionType, setTransactionType] = useState<'SALE' | 'RENT'>(
@@ -256,15 +260,43 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
       {/* Footer */}
       <div className="bg-white border-t border-gray-200 px-4 md:px-6 py-3 sticky bottom-0 z-10">
         <div className="flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-            aria-label="Imprimir PDF"
-          >
-            <Printer className="w-4 h-4" />
-            <span className="hidden sm:inline">Imprimir PDF</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              aria-label="Imprimir PDF"
+            >
+              <Printer className="w-4 h-4" />
+              <span className="hidden sm:inline">Imprimir</span>
+            </button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowMarketingModal(true)}
+              aria-label="Criar plano de marketing"
+            >
+              <Megaphone className="w-4 h-4" />
+              <span className="hidden sm:inline">Marketing</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowContractModal(true)}
+              aria-label="Criar contrato"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Contrato</span>
+            </Button>
+            <a
+              href={`/admin/analise-mercado`}
+              className="flex items-center gap-1 px-3 py-2 text-sm text-[#2E86DE] hover:text-[#0D2F5E] border border-[#2E86DE] rounded-md hover:bg-blue-50 transition-colors"
+              aria-label="Análise de mercado"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Análise</span>
+            </a>
+          </div>
 
           <div className="flex items-center gap-2">
             <Button
@@ -297,6 +329,21 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
           </div>
         </div>
       </div>
+
+      {showMarketingModal && (
+        <MarketingPlanModal
+          propertyId={propertyId}
+          propertyTitle={(data.title as string) ?? initialData.ref ?? propertyId}
+          onClose={() => setShowMarketingModal(false)}
+        />
+      )}
+      {showContractModal && (
+        <ContractModal
+          propertyId={propertyId}
+          propertyTitle={(data.title as string) ?? initialData.ref ?? propertyId}
+          onClose={() => setShowContractModal(false)}
+        />
+      )}
     </div>
   )
 }
