@@ -1,48 +1,73 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions)
-  if (!session) redirect('/admin/login')
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter, usePathname } from 'next/navigation'
+import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { AdminHeader } from '@/components/admin/AdminHeader'
+
+const pageTitles: Record<string, string> = {
+  '/admin': 'Dashboard',
+  '/admin/imoveis': 'Imóveis',
+  '/admin/imoveis/novo': 'Novo Imóvel',
+  '/admin/contatos': 'Leads & Contatos',
+  '/admin/analise-mercado': 'Análise de Mercado',
+  '/admin/marketing': 'Marketing',
+  '/admin/relatorios': 'Relatórios',
+  '/admin/configuracoes': 'Configurações',
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/admin/login')
+    }
+  }, [status, router])
+
+  // Fechar menu mobile ao trocar de rota
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-[#F0F4F8] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#2E86DE] border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated') return null
+
+  // Detecta o título da página pelo pathname (match mais longo primeiro)
+  const pageTitle = Object.entries(pageTitles)
+    .sort((a, b) => b[0].length - a[0].length)
+    .find(([key]) => pathname.startsWith(key))?.[1] ?? 'Admin'
+
+  const userName = session?.user?.name ?? 'Admin'
 
   return (
     <div className="flex min-h-screen bg-[#F0F4F8]">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0D2F5E] text-white flex flex-col min-h-screen">
-        <div className="p-6 border-b border-[#1A4A8A]">
-          <h1 className="text-xl font-bold">Paulo Pop</h1>
-          <p className="text-blue-300 text-sm">Painel Admin</p>
-        </div>
-        <nav className="flex-1 p-4 space-y-1">
-          <a href="/admin" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[#1A4A8A] transition-colors text-sm font-medium">
-            Dashboard
-          </a>
-          <a href="/admin/imoveis" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[#1A4A8A] transition-colors text-sm font-medium">
-            Imóveis
-          </a>
-          <a href="/admin/contatos" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[#1A4A8A] transition-colors text-sm font-medium">
-            Leads & Contatos
-          </a>
-          <a href="/admin/analise-mercado" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[#1A4A8A] transition-colors text-sm font-medium">
-            Análise de Mercado
-          </a>
-          <a href="/admin/configuracoes" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[#1A4A8A] transition-colors text-sm font-medium">
-            Configurações
-          </a>
-        </nav>
-        <div className="p-4 border-t border-[#1A4A8A]">
-          <p className="text-sm text-blue-300">{session.user.name}</p>
-          <a href="/api/auth/signout" className="text-xs text-blue-400 hover:text-white transition-colors">
-            Sair
-          </a>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <AdminSidebar
+        userName={userName}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <AdminHeader
+          title={pageTitle}
+          onMenuClick={() => setMobileMenuOpen(true)}
+          userName={userName}
+        />
+        <main className="flex-1 p-4 lg:p-6">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }
