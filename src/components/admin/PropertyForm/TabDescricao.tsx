@@ -25,14 +25,16 @@ export function TabDescricao({ data, onChange }: TabDescricaoProps) {
       })
       if (!res.ok) throw new Error()
       const result = await res.json()
-      if (field === 'all') {
-        if (result.title) onChange('title', result.title)
-        if (result.description) onChange('description', result.description)
-        if (result.marketingDescription) onChange('marketingDescription', result.marketingDescription)
-        if (result.surroundingsInfo) onChange('surroundingsInfo', result.surroundingsInfo)
-      }
+      // Preenche campos PT-BR
+      if (result.title) onChange('title', result.title)
+      if (result.description) onChange('description', result.description)
+      if (result.marketingDescription) onChange('marketingDescription', result.marketingDescription)
+      if (result.surroundingsInfo) onChange('surroundingsInfo', result.surroundingsInfo)
+      // Preenche campos EN
+      if (result.titleEn) onChange('titleEn', result.titleEn)
+      if (result.descriptionEn) onChange('descriptionEn', result.descriptionEn)
     } catch {
-      alert('Erro ao gerar com IA. Verifique se a GEMINI_API_KEY está configurada.')
+      alert('Erro ao gerar com IA. Verifique se a ANTHROPIC_API_KEY está configurada.')
     } finally {
       setGenerating(null)
     }
