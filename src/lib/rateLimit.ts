@@ -37,7 +37,7 @@ export function checkRateLimit(ip: string, limit: number, windowMs: number): boo
 // Limpeza periódica para evitar crescimento infinito do Map
 setInterval(() => {
   const now = Date.now()
-  for (const [key, entry] of store.entries()) {
+  store.forEach((entry, key) => {
     if (entry.resetAt <= now) store.delete(key)
-  }
+  })
 }, 60_000)

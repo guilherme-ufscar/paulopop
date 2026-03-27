@@ -31,6 +31,15 @@ interface SearchParams {
 
 const PAGE_SIZE = 12
 
+/** Converte SearchParams para Record<string,string> ignorando arrays (feature) */
+function spToRecord(sp: SearchParams, overrides: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [k, v] of Object.entries(sp)) {
+    if (typeof v === 'string') result[k] = v
+  }
+  return { ...result, ...overrides }
+}
+
 function buildWhere(sp: SearchParams): Prisma.PropertyWhereInput {
   const features = Array.isArray(sp.feature)
     ? sp.feature
@@ -160,7 +169,7 @@ async function PropertyGrid({ searchParams }: { searchParams: SearchParams }) {
         <nav className="flex justify-center gap-2 mt-10" aria-label="Paginação">
           {page > 1 && (
             <Link
-              href={`?${new URLSearchParams({ ...searchParams, pagina: String(page - 1) })}`}
+              href={`?${new URLSearchParams(spToRecord(searchParams, { pagina: String(page - 1) }))}`}
               className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:border-[#0D2F5E] hover:text-[#0D2F5E] transition-colors"
               aria-label="Página anterior"
             >
@@ -172,7 +181,7 @@ async function PropertyGrid({ searchParams }: { searchParams: SearchParams }) {
             return (
               <Link
                 key={p2}
-                href={`?${new URLSearchParams({ ...searchParams, pagina: String(p2) })}`}
+                href={`?${new URLSearchParams(spToRecord(searchParams, { pagina: String(p2) }))}`}
                 className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                   p2 === page
                     ? 'bg-[#0D2F5E] text-white'
@@ -186,7 +195,7 @@ async function PropertyGrid({ searchParams }: { searchParams: SearchParams }) {
           })}
           {page < totalPages && (
             <Link
-              href={`?${new URLSearchParams({ ...searchParams, pagina: String(page + 1) })}`}
+              href={`?${new URLSearchParams(spToRecord(searchParams, { pagina: String(page + 1) }))}`}
               className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-gray-600 hover:border-[#0D2F5E] hover:text-[#0D2F5E] transition-colors"
               aria-label="Próxima página"
             >

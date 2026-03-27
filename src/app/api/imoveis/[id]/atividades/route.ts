@@ -11,7 +11,7 @@ const bodySchema = z.object({
     'DOCUMENT_ADDED', 'IMAGE_ADDED', 'ANALYSIS_GENERATED', 'NOTE_ADDED',
   ]),
   description: z.string().min(1).max(1000),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function POST(
@@ -37,7 +37,7 @@ export async function POST(
       userId: (session.user as { id: string }).id,
       type,
       description,
-      metadata: metadata ?? {},
+      metadata: (metadata ?? {}) as Parameters<typeof prisma.activity.create>[0]['data']['metadata'],
     },
     include: {
       user: { select: { name: true } },

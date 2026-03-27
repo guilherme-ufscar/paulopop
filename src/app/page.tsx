@@ -2,10 +2,10 @@ import { prisma } from '@/lib/prisma'
 import { SearchBar } from '@/components/public/SearchBar'
 import { PropertyCarousel } from '@/components/public/PropertyCarousel'
 import { ContactForm } from '@/components/public/ContactForm'
+import { Phone, MessageCircle, Send, MapPin, Building2 } from 'lucide-react'
 import {
-  Phone, MessageCircle, Send, Youtube, Facebook, Linkedin,
-  Twitter, Instagram, MapPin, Building2
-} from 'lucide-react'
+  YoutubeIcon, FacebookIcon, LinkedinIcon, TwitterXIcon, InstagramIcon
+} from '@/components/ui/SocialIcons'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
@@ -88,11 +88,11 @@ export default async function HomePage() {
   const socialLinks = [
     { href: whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}` : null, icon: <MessageCircle className="w-5 h-5" fill="white" strokeWidth={0} />, label: 'WhatsApp', color: 'bg-[#25D366]' },
     { href: config?.ownerTelegram, icon: <TelegramIcon className="w-5 h-5" />, label: 'Telegram', color: 'bg-[#0088cc]' },
-    { href: config?.ownerYoutube, icon: <Youtube className="w-5 h-5" />, label: 'YouTube', color: 'bg-red-600' },
-    { href: config?.ownerFacebook, icon: <Facebook className="w-5 h-5" />, label: 'Facebook', color: 'bg-[#1877F2]' },
-    { href: config?.ownerLinkedin, icon: <Linkedin className="w-5 h-5" />, label: 'LinkedIn', color: 'bg-[#0A66C2]' },
-    { href: config?.ownerTwitter, icon: <Twitter className="w-5 h-5" />, label: 'Twitter/X', color: 'bg-black' },
-    { href: config?.ownerInstagram, icon: <Instagram className="w-5 h-5" />, label: 'Instagram', color: 'bg-gradient-to-br from-purple-600 to-pink-500' },
+    { href: config?.ownerYoutube, icon: <YoutubeIcon className="w-5 h-5" />, label: 'YouTube', color: 'bg-red-600' },
+    { href: config?.ownerFacebook, icon: <FacebookIcon className="w-5 h-5" />, label: 'Facebook', color: 'bg-[#1877F2]' },
+    { href: config?.ownerLinkedin, icon: <LinkedinIcon className="w-5 h-5" />, label: 'LinkedIn', color: 'bg-[#0A66C2]' },
+    { href: (config as Record<string, unknown> | null)?.ownerTwitter as string | undefined, icon: <TwitterXIcon className="w-5 h-5" />, label: 'Twitter/X', color: 'bg-black' },
+    { href: config?.ownerInstagram, icon: <InstagramIcon className="w-5 h-5" />, label: 'Instagram', color: 'bg-gradient-to-br from-purple-600 to-pink-500' },
   ].filter(s => !!s.href)
 
   return (

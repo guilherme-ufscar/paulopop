@@ -44,7 +44,7 @@ export function DashboardCharts({ leadsChartData, statusChartData }: DashboardCh
             <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} allowDecimals={false} />
             <Tooltip
               contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-              formatter={(value: number) => [value, 'Leads']}
+              formatter={(value) => [value, 'Leads']}
             />
             <Bar dataKey="total" fill="#2E86DE" radius={[4, 4, 0, 0]} />
           </BarChart>
