@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { MarketAnalysisClient } from './MarketAnalysisClient'
 import type { Metadata } from 'next'

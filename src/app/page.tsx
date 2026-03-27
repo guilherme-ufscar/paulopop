@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { SearchBar } from '@/components/public/SearchBar'
 import { PropertyCarousel } from '@/components/public/PropertyCarousel'

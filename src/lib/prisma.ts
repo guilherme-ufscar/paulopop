@@ -4,7 +4,11 @@ import { PrismaPg } from '@prisma/adapter-pg'
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {
-    throw new Error('DATABASE_URL não configurada')
+    // Durante o build do Next.js não há DATABASE_URL — retornar cliente sem conexão
+    // O erro real ocorrerá apenas ao tentar executar queries em runtime
+    return new PrismaClient({
+      log: ['error'],
+    })
   }
   const adapter = new PrismaPg({ connectionString })
   return new PrismaClient({
