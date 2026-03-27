@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { Trash2, Star, Upload, RotateCw } from 'lucide-react'
+import NextImage from 'next/image'
 import { Input } from '@/components/ui/Input'
 
 interface PropertyImage {
@@ -33,7 +34,7 @@ interface TabImagensVideosProps {
 }
 
 export function TabImagensVideos({
-  propertyId,
+  propertyId: _propertyId,
   images,
   videos,
   virtualTourType,
@@ -162,10 +163,12 @@ export function TabImagensVideos({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-4">
             {images.map((img, idx) => (
               <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-square bg-gray-100">
-                <img
+                <NextImage
                   src={img.thumbnailUrl ?? img.url}
                   alt={img.alt ?? `Foto ${idx + 1}`}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="200px"
+                  className="object-cover"
                 />
                 {img.isCover && (
                   <div className="absolute top-1 left-1 bg-[#2E86DE] text-white text-xs px-1.5 py-0.5 rounded-full font-medium">

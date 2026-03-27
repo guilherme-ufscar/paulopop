@@ -57,7 +57,6 @@ function PropertyCardComponent({
   state,
   zipCode,
   coverImage,
-  createdAt,
   isNew,
   className,
 }: PropertyCardProps) {

@@ -216,11 +216,10 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
             <TabDescricao data={data} onChange={handleChange} />
           )}
           {activeTab === 'imagens' && (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             <TabImagensVideos
               propertyId={propertyId}
-              images={(data.images as any[]) ?? []}
-              videos={(data.videos as any[]) ?? []}
+              images={(data.images as never) ?? []}
+              videos={(data.videos as never) ?? []}
               virtualTourType={(data.virtualTourType as string) ?? 'NONE'}
               virtualTourUrl={(data.virtualTourUrl as string) ?? ''}
               externalLink={(data.externalLink as string) ?? ''}
@@ -230,17 +229,15 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
             />
           )}
           {activeTab === 'documentos' && (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             <TabDocumentos
-              documents={(data.documents as any[]) ?? []}
+              documents={(data.documents as never) ?? []}
               onDocumentsChange={docs => handleChange('documents', docs)}
             />
           )}
           {activeTab === 'potencial' && <TabPotencialComprador />}
           {activeTab === 'corretores' && <TabCorretores />}
           {activeTab === 'atividades' && (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            <TabAtividades propertyId={propertyId} activities={(data.activities as any[]) ?? []} />
+            <TabAtividades propertyId={propertyId} activities={(data.activities as never) ?? []} />
           )}
           {activeTab === 'contatos' && (
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

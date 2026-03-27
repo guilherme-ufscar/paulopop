@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const body = await request.json()
 
   // Remover campos que são relações (gerenciados separadamente)
-  const { images, videos, documents, features, lifestyles, parkingSpots, rooms, additionalFees, portals, leads, activities, agent, condominium, owner, ...data } = body
+  const { images: _images, videos: _videos, documents: _documents, features: _features, lifestyles: _lifestyles, parkingSpots: _parkingSpots, rooms: _rooms, additionalFees: _additionalFees, portals: _portals, leads: _leads, activities: _activities, agent: _agent, condominium: _condominium, owner: _owner, ...data } = body
 
   // Sanitizar campos HTML antes de salvar (5.4)
   if (data.description) data.description = sanitizeHtml(data.description)
