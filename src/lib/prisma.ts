@@ -1,14 +1,14 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
-function createPrismaClient() {
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {
-    // Durante o build do Next.js não há DATABASE_URL — retornar cliente sem conexão
-    // O erro real ocorrerá apenas ao tentar executar queries em runtime
-    return new PrismaClient({
-      log: ['error'],
-    })
+    throw new Error('DATABASE_URL não configurada')
   }
   const adapter = new PrismaPg({ connectionString })
   return new PrismaClient({
@@ -17,10 +17,12 @@ function createPrismaClient() {
   })
 }
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-export const prisma = globalForPrisma.prisma ?? createPrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Lazy singleton — só cria a conexão na primeira chamada em runtime
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop: string | symbol) {
+    if (!globalForPrisma.prisma) {
+      globalForPrisma.prisma = createPrismaClient()
+    }
+    return Reflect.get(globalForPrisma.prisma, prop)
+  },
+})
