@@ -37,6 +37,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="pt-BR" className={`${playfair.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased bg-white text-gray-900">
         <Providers>
+          {/* Skip link — acessibilidade (5.3) */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-[#0D2F5E] focus:text-white focus:rounded-lg focus:font-medium focus:text-sm"
+          >
+            Ir para o conteúdo principal
+          </a>
           <PublicShell
             ownerName={config?.ownerName ?? 'Paulo Pop'}
             ownerCompany={config?.ownerCompany ?? undefined}

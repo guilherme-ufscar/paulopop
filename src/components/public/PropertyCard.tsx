@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import { memo } from 'react'
 import { Bed, Bath, LayoutGrid, Maximize2, Car, Heart, Share2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
@@ -38,7 +40,7 @@ const transactionBadge: Record<string, string> = {
   RENT: 'Para Alugar',
 }
 
-export function PropertyCard({
+function PropertyCardComponent({
   slug,
   title,
   propertyType,
@@ -84,11 +86,13 @@ export function PropertyCard({
       {/* Imagem */}
       <div className="relative h-52 overflow-hidden bg-gray-100">
         {coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={coverImage}
-            alt={title ?? `${propertyType} em ${city}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            alt={title ?? `${propertyType} em ${city}` ?? 'Imóvel'}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0D2F5E]/10 to-[#2E86DE]/10">
@@ -194,3 +198,5 @@ export function PropertyCard({
     </Link>
   )
 }
+
+export const PropertyCard = memo(PropertyCardComponent)

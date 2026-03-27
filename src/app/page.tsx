@@ -7,6 +7,7 @@ import {
   Twitter, Instagram, MapPin, Building2
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -103,12 +104,14 @@ export default async function HomePage() {
       >
         {/* Fundo */}
         {heroBg ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={heroBg}
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
         ) : (
           <div
@@ -127,8 +130,14 @@ export default async function HomePage() {
               {/* Avatar */}
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/30 mb-4 bg-white/10">
                 {ownerPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={ownerPhoto} alt={ownerName} className="w-full h-full object-cover" />
+                  <Image
+                    src={ownerPhoto}
+                    alt={ownerName}
+                    fill
+                    priority
+                    sizes="96px"
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Building2 className="w-10 h-10 text-white/60" />
@@ -222,11 +231,12 @@ export default async function HomePage() {
               {/* Foto grande */}
               <div className="w-full h-72 rounded-2xl overflow-hidden mb-6 bg-[#F0F4F8]">
                 {ownerPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={ownerPhoto}
                     alt={ownerName}
-                    className="w-full h-full object-cover object-top"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-top"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

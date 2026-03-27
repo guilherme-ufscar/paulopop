@@ -41,7 +41,12 @@ export async function GET(request: NextRequest) {
     prisma.property.count({ where }),
   ])
 
-  return NextResponse.json({ properties, total, page, limit, pages: Math.ceil(total / limit) })
+  const response = NextResponse.json({ properties, total, page, limit, pages: Math.ceil(total / limit) })
+  if (!admin) {
+    // Cache de 5 minutos para listagem pública
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60')
+  }
+  return response
 }
 
 export async function POST(request: NextRequest) {

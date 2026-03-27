@@ -28,7 +28,7 @@ export function PublicShell({
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       <Footer ownerName={ownerName} ownerCompany={ownerCompany ?? undefined} />
       {whatsapp && (
         <WhatsAppButton phone={whatsapp} message={whatsappMessage} />

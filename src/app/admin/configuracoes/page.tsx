@@ -1,0 +1,475 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import {
+  User, Phone, Share2, Layout, Search, Mail, Puzzle,
+  Save, Eye, CheckCircle, AlertCircle, Upload, Loader2
+} from 'lucide-react'
+
+const TABS = [
+  { id: 'perfil', label: 'Perfil', icon: User },
+  { id: 'contatos', label: 'Contatos', icon: Phone },
+  { id: 'redes', label: 'Redes Sociais', icon: Share2 },
+  { id: 'aparencia', label: 'Aparência do Site', icon: Layout },
+  { id: 'seo', label: 'SEO', icon: Search },
+  { id: 'email', label: 'E-mail', icon: Mail },
+  { id: 'integracoes', label: 'Integrações', icon: Puzzle },
+] as const
+
+type TabId = typeof TABS[number]['id']
+
+interface Config {
+  ownerName?: string
+  ownerCreci?: string
+  ownerBio?: string
+  ownerCompany?: string
+  ownerCompanyCreci?: string
+  ownerPhotoUrl?: string
+  ownerPhone?: string
+  ownerWhatsapp?: string
+  ownerEmail?: string
+  ownerAddress?: string
+  ownerInstagram?: string
+  ownerFacebook?: string
+  ownerLinkedin?: string
+  ownerYoutube?: string
+  ownerTelegram?: string
+  ownerTwitter?: string
+  heroTitle?: string
+  heroSubtitle?: string
+  heroBgUrl?: string
+  whatsappMessage?: string
+  metaTitle?: string
+  metaDescription?: string
+  ogImageUrl?: string
+  smtpHost?: string
+  smtpPort?: string
+  smtpUser?: string
+  smtpPassword?: string
+  notificationEmail?: string
+  anthropicApiKey?: string
+  googleMapsKey?: string
+  footerText?: string
+}
+
+export default function ConfiguracoesPage() {
+  const [activeTab, setActiveTab] = useState<TabId>('perfil')
+  const [config, setConfig] = useState<Config>({})
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [testingEmail, setTestingEmail] = useState(false)
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const photoRef = useRef<HTMLInputElement>(null)
+  const heroBgRef = useRef<HTMLInputElement>(null)
+  const ogRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetch('/api/admin/configuracoes')
+      .then(r => r.json())
+      .then((data: Config) => setConfig(data ?? {}))
+      .finally(() => setLoading(false))
+  }, [])
+
+  function set(field: keyof Config, value: string) {
+    setConfig(prev => ({ ...prev, [field]: value }))
+  }
+
+  async function uploadImage(file: File, field: keyof Config) {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: formData })
+    if (!res.ok) throw new Error('Falha no upload')
+    const { url } = await res.json() as { url: string }
+    set(field, url)
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    setFeedback(null)
+    try {
+      const res = await fetch('/api/admin/configuracoes', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      })
+      if (!res.ok) throw new Error()
+      setFeedback({ type: 'success', msg: 'Configurações salvas com sucesso!' })
+    } catch {
+      setFeedback({ type: 'error', msg: 'Erro ao salvar. Tente novamente.' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleTestEmail() {
+    setTestingEmail(true)
+    setFeedback(null)
+    try {
+      const res = await fetch('/api/admin/configuracoes/test-email', { method: 'POST' })
+      if (!res.ok) throw new Error()
+      setFeedback({ type: 'success', msg: 'E-mail de teste enviado!' })
+    } catch {
+      setFeedback({ type: 'error', msg: 'Falha ao enviar e-mail de teste.' })
+    } finally {
+      setTestingEmail(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-[#2E86DE]" aria-label="Carregando configurações..." />
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto p-6">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#0D2F5E]">Configurações</h1>
+          <p className="text-sm text-gray-500">Personalize o site sem precisar de desenvolvedor</p>
+        </div>
+        <div className="flex gap-2">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-4 py-2 border border-[#0D2F5E] text-[#0D2F5E] rounded-xl text-sm font-medium hover:bg-[#0D2F5E] hover:text-white transition-colors"
+            aria-label="Visualizar site em nova aba"
+          >
+            <Eye className="w-4 h-4" />
+            Ver Site
+          </a>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#2E86DE] hover:bg-[#1B6EC2] disabled:opacity-60 text-white rounded-xl text-sm font-medium transition-colors"
+            aria-label="Salvar configurações"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Salvar
+          </button>
+        </div>
+      </div>
+
+      {/* Feedback */}
+      {feedback && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl mb-4 text-sm ${
+            feedback.type === 'success'
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}
+        >
+          {feedback.type === 'success'
+            ? <CheckCircle className="w-4 h-4 flex-shrink-0" />
+            : <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          }
+          {feedback.msg}
+        </div>
+      )}
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar de tabs */}
+        <nav
+          className="lg:w-48 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-visible"
+          aria-label="Abas de configuração"
+        >
+          {TABS.map(tab => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-[#0D2F5E] text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                {tab.label}
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* Conteúdo da aba */}
+        <div className="flex-1 bg-white rounded-2xl p-6 shadow-sm space-y-5">
+          {/* ─── PERFIL ─── */}
+          {activeTab === 'perfil' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">Perfil do Corretor</h2>
+              {/* Foto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Foto do Corretor</label>
+                <div className="flex items-center gap-4">
+                  {config.ownerPhotoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={config.ownerPhotoUrl}
+                      alt="Foto do corretor"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-[#2E86DE]"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                      <User className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => photoRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-xl text-sm hover:border-[#2E86DE] transition-colors"
+                    aria-label="Alterar foto do corretor"
+                  >
+                    <Upload className="w-4 h-4" /> Alterar foto
+                  </button>
+                  <input
+                    ref={photoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-hidden="true"
+                    onChange={async e => {
+                      const file = e.target.files?.[0]
+                      if (file) await uploadImage(file, 'ownerPhotoUrl')
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Field label="Nome completo" value={config.ownerName} onChange={v => set('ownerName', v)} />
+              <Field label="CRECI" value={config.ownerCreci} onChange={v => set('ownerCreci', v)} />
+              <Field label="Empresa" value={config.ownerCompany} onChange={v => set('ownerCompany', v)} />
+              <Field label="CRECI da Empresa" value={config.ownerCompanyCreci} onChange={v => set('ownerCompanyCreci', v)} />
+              <Field
+                label="Biografia"
+                value={config.ownerBio}
+                onChange={v => set('ownerBio', v)}
+                multiline
+                rows={4}
+              />
+            </>
+          )}
+
+          {/* ─── CONTATOS ─── */}
+          {activeTab === 'contatos' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">Informações de Contato</h2>
+              <Field label="WhatsApp (com DDI, ex: 5561912345678)" value={config.ownerWhatsapp} onChange={v => set('ownerWhatsapp', v)} type="tel" />
+              <Field label="Telefone" value={config.ownerPhone} onChange={v => set('ownerPhone', v)} type="tel" />
+              <Field label="E-mail de contato" value={config.ownerEmail} onChange={v => set('ownerEmail', v)} type="email" />
+              <Field label="Endereço da empresa" value={config.ownerAddress} onChange={v => set('ownerAddress', v)} />
+            </>
+          )}
+
+          {/* ─── REDES SOCIAIS ─── */}
+          {activeTab === 'redes' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">Redes Sociais</h2>
+              <Field label="Instagram (URL)" value={config.ownerInstagram} onChange={v => set('ownerInstagram', v)} type="url" />
+              <Field label="Facebook (URL)" value={config.ownerFacebook} onChange={v => set('ownerFacebook', v)} type="url" />
+              <Field label="LinkedIn (URL)" value={config.ownerLinkedin} onChange={v => set('ownerLinkedin', v)} type="url" />
+              <Field label="YouTube (URL)" value={config.ownerYoutube} onChange={v => set('ownerYoutube', v)} type="url" />
+              <Field label="Telegram (URL ou número)" value={config.ownerTelegram} onChange={v => set('ownerTelegram', v)} />
+              <Field label="Twitter/X (URL)" value={config.ownerTwitter} onChange={v => set('ownerTwitter', v)} type="url" />
+            </>
+          )}
+
+          {/* ─── APARÊNCIA ─── */}
+          {activeTab === 'aparencia' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">Aparência do Site</h2>
+              <Field label="Título do Hero" value={config.heroTitle} onChange={v => set('heroTitle', v)} />
+              <Field label="Subtítulo do Hero" value={config.heroSubtitle} onChange={v => set('heroSubtitle', v)} />
+              <Field label="Mensagem padrão WhatsApp" value={config.whatsappMessage} onChange={v => set('whatsappMessage', v)} />
+              <Field label="Texto do rodapé" value={config.footerText} onChange={v => set('footerText', v)} />
+
+              {/* Foto de fundo do hero */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Foto de fundo do Hero</label>
+                <div className="flex items-center gap-4">
+                  {config.heroBgUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={config.heroBgUrl} alt="Fundo do hero" className="w-32 h-20 object-cover rounded-xl" />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => heroBgRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-xl text-sm hover:border-[#2E86DE] transition-colors"
+                    aria-label="Alterar imagem de fundo do hero"
+                  >
+                    <Upload className="w-4 h-4" /> Alterar imagem
+                  </button>
+                  <input
+                    ref={heroBgRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-hidden="true"
+                    onChange={async e => {
+                      const file = e.target.files?.[0]
+                      if (file) await uploadImage(file, 'heroBgUrl')
+                    }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ─── SEO ─── */}
+          {activeTab === 'seo' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">SEO e Meta Tags</h2>
+              <Field
+                label="Meta Title padrão"
+                value={config.metaTitle}
+                onChange={v => set('metaTitle', v)}
+                hint="Exibido na aba do navegador e nos resultados do Google"
+              />
+              <Field
+                label="Meta Description padrão"
+                value={config.metaDescription}
+                onChange={v => set('metaDescription', v)}
+                multiline
+                rows={3}
+                hint="Máx. 160 caracteres"
+              />
+              {/* OG Image */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">OG Image padrão</label>
+                <p className="text-xs text-gray-400 mb-2">Exibida ao compartilhar o site em redes sociais (1200×630 px recomendado)</p>
+                <div className="flex items-center gap-4">
+                  {config.ogImageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={config.ogImageUrl} alt="OG Image" className="w-40 h-20 object-cover rounded-xl" />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => ogRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-xl text-sm hover:border-[#2E86DE] transition-colors"
+                    aria-label="Alterar OG image padrão"
+                  >
+                    <Upload className="w-4 h-4" /> Alterar imagem
+                  </button>
+                  <input
+                    ref={ogRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-hidden="true"
+                    onChange={async e => {
+                      const file = e.target.files?.[0]
+                      if (file) await uploadImage(file, 'ogImageUrl')
+                    }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ─── EMAIL ─── */}
+          {activeTab === 'email' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">Configurações de E-mail (SMTP)</h2>
+              <Field label="SMTP Host" value={config.smtpHost} onChange={v => set('smtpHost', v)} placeholder="smtp.gmail.com" />
+              <Field label="SMTP Porta" value={config.smtpPort} onChange={v => set('smtpPort', v)} placeholder="587" />
+              <Field label="SMTP Usuário" value={config.smtpUser} onChange={v => set('smtpUser', v)} type="email" />
+              <Field label="SMTP Senha" value={config.smtpPassword} onChange={v => set('smtpPassword', v)} type="password" />
+              <Field
+                label="E-mail de notificação de leads"
+                value={config.notificationEmail}
+                onChange={v => set('notificationEmail', v)}
+                type="email"
+                hint="Você receberá um e-mail cada vez que um novo lead for enviado"
+              />
+              <button
+                type="button"
+                onClick={handleTestEmail}
+                disabled={testingEmail}
+                className="flex items-center gap-1.5 px-4 py-2 border border-[#2E86DE] text-[#2E86DE] rounded-xl text-sm font-medium hover:bg-[#2E86DE] hover:text-white transition-colors disabled:opacity-60"
+                aria-label="Enviar e-mail de teste"
+              >
+                {testingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                Testar envio
+              </button>
+            </>
+          )}
+
+          {/* ─── INTEGRAÇÕES ─── */}
+          {activeTab === 'integracoes' && (
+            <>
+              <h2 className="font-semibold text-[#0D2F5E] text-lg">Integrações e Chaves de API</h2>
+              <Field
+                label="Anthropic API Key (Claude)"
+                value={config.anthropicApiKey}
+                onChange={v => set('anthropicApiKey', v)}
+                type="password"
+                hint="Necessária para geração de descrições por IA"
+              />
+              <Field
+                label="Google Maps API Key"
+                value={config.googleMapsKey}
+                onChange={v => set('googleMapsKey', v)}
+                type="password"
+                hint="Opcional — necessária apenas se quiser usar Google Maps em vez de OpenStreetMap"
+              />
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Componente de campo reutilizável ────────────────────────────────────────
+
+function Field({
+  label, value, onChange, type = 'text', multiline = false, rows = 3, hint, placeholder,
+}: {
+  label: string
+  value?: string
+  onChange: (v: string) => void
+  type?: string
+  multiline?: boolean
+  rows?: number
+  hint?: string
+  placeholder?: string
+}) {
+  const id = label.toLowerCase().replace(/\s+/g, '-')
+  const className =
+    'w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E86DE] focus:border-transparent transition-colors'
+
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          id={id}
+          rows={rows}
+          value={value ?? ''}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={className}
+        />
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={value ?? ''}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={className}
+        />
+      )}
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+    </div>
+  )
+}

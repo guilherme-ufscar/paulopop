@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const property = await prisma.property.findUnique({
@@ -36,6 +37,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   // Remover campos que são relações (gerenciados separadamente)
   const { images, videos, documents, features, lifestyles, parkingSpots, rooms, additionalFees, portals, leads, activities, agent, condominium, owner, ...data } = body
+
+  // Sanitizar campos HTML antes de salvar (5.4)
+  if (data.description) data.description = sanitizeHtml(data.description)
+  if (data.marketingDescription) data.marketingDescription = sanitizeHtml(data.marketingDescription)
+  if (data.surroundingsInfo) data.surroundingsInfo = sanitizeHtml(data.surroundingsInfo)
+  if (data.descriptionEn) data.descriptionEn = sanitizeHtml(data.descriptionEn)
 
   const property = await prisma.property.update({
     where: { id: params.id },

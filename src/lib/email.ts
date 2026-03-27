@@ -264,3 +264,15 @@ export async function sendReportToOwner(options: {
     console.error('[Email] Falha ao enviar relatório ao proprietário:', err)
   }
 }
+
+/** Função genérica para envio de e-mail */
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  if (!process.env.SMTP_HOST) throw new Error('SMTP não configurado')
+  const transporter = getTransporter()
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM ?? 'noreply@paulopop.com.br',
+    to,
+    subject,
+    html,
+  })
+}

@@ -8,6 +8,7 @@ import { PropertyCarousel } from '@/components/public/PropertyCarousel'
 import { ViewCounter } from '@/components/public/ViewCounter'
 import { formatCurrency, formatArea } from '@/lib/formatters'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import {
   MapPin, Bed, Bath, LayoutGrid, Maximize2, Car, Building2,
   ChevronRight, MessageCircle, Phone, FileText, Download,
@@ -394,6 +395,7 @@ export default async function PropertyPage({ params }: Props) {
                       title="Tour Virtual"
                       className="w-full h-full"
                       allowFullScreen
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -534,8 +536,13 @@ function AgentBar({ name, company, avatarUrl, phone, whatsapp, propertySlug }: {
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0">
             {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+              <Image
+                src={avatarUrl}
+                alt={name}
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
             ) : (
               <Building2 className="w-5 h-5 m-2.5 text-gray-400" />
             )}
