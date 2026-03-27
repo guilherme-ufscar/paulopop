@@ -1441,3 +1441,119 @@ npm run dev
 8. **Tratar todos os erros** — nunca deixar promise não tratada ou try/catch vazio
 9. **Comentar em português** todo código de lógica de negócio complexo
 ```
+
+---
+
+## 🚀 Status de Produção
+
+**Fase atual**: Fase 5 — Polimento e Produção (CONCLUÍDA em 2026-03-27)
+
+### Repositório
+
+- **GitHub**: Verificar URL com `git remote -v`
+- **Branch principal**: `master`
+
+### Credenciais Padrão de Acesso Admin
+
+- **URL**: `/admin`
+- **E-mail**: `admin@paulopop.com.br`
+- **Senha inicial**: `PauloPop@2025` ← **ALTERAR NO PRIMEIRO ACESSO**
+
+### Estrutura de Diretórios de Upload
+
+```
+public/
+  uploads/
+    images/     ← imagens dos imóveis
+    documents/  ← documentos dos imóveis
+```
+
+### Como Rodar Localmente
+
+```bash
+# 1. Clonar o repositório
+git clone <url-do-repo>
+cd paulopop
+
+# 2. Instalar dependências
+npm install
+
+# 3. Configurar variáveis de ambiente
+cp .env.example .env.local
+# Editar .env.local com suas credenciais
+
+# 4. Inicializar banco de dados
+npx prisma migrate dev --name init
+
+# 5. Criar admin inicial
+npm run db:seed
+
+# 6. Iniciar em desenvolvimento
+npm run dev
+# Acesse http://localhost:3000
+
+# 7. Rodar testes unitários
+npm test
+
+# 8. Rodar testes E2E (precisa do servidor rodando)
+npm run test:e2e
+```
+
+### Como Fazer Deploy de Atualizações
+
+```bash
+# 1. Fazer as mudanças e commitar
+git add -A
+git commit -m "feat: descrição da mudança"
+git push origin master
+# A Vercel faz deploy automático
+
+# 2. Se mudou o schema do banco:
+npx prisma migrate deploy  # em produção
+```
+
+### Como Adicionar Novos Tipos de Imóveis
+
+O tipo de imóvel é um campo `String` livre no schema (`propertyType`). Para adicionar novos tipos:
+
+1. No arquivo `src/components/admin/PropertyCreateModal.tsx`, adicionar o novo tipo na lista de opções do dropdown
+2. Se quiser padronizar, criar um enum no Prisma:
+   ```prisma
+   enum PropertyType { APARTMENT HOUSE ... NEW_TYPE }
+   ```
+3. Rodar `npx prisma migrate dev --name add-property-type`
+
+### Novos Tipos de Imóveis Pré-configurados
+
+Lista atual (campo `propertyType`, valor livre):
+Apartamento, Casa, Sobrado, Terreno, Sala Comercial, Loja, Galpão, Prédio, Chácara, Fazenda, Studio, Kitnet, Cobertura, Flat, Mansão, Casa de Condomínio, Ponto Comercial
+
+---
+
+## 🧪 Testes
+
+### Rodar Testes Unitários
+
+```bash
+npm test           # executa uma vez
+npm run test:watch # modo watch (desenvolvimento)
+```
+
+Arquivos de teste em `tests/unit/`:
+- `utils.test.ts` — slugify, generateRef
+- `formatters.test.ts` — formatCurrency, formatArea, formatDate
+- `sanitize.test.ts` — stripHtml, sanitizeHtml, limitString
+
+### Rodar Testes E2E (Playwright)
+
+```bash
+# Com o servidor rodando em localhost:3000
+npm run test:e2e          # modo headless
+npm run test:e2e:ui       # modo visual (debug)
+```
+
+Arquivos E2E em `tests/e2e/`:
+- `home.spec.ts` — home page, skip link, navegação
+- `admin.spec.ts` — autenticação, login, formulário de lead
+
+---
