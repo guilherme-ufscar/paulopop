@@ -505,11 +505,11 @@ function DescriptionExpander({ text }: { text: string }) {
 }
 
 // Importamos como lazy para não precisar de arquivo separado
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 
-const DescriptionExpanderClient = dynamic(() => import('@/components/public/DescriptionExpander'), { ssr: false })
+const DescriptionExpanderClient = nextDynamic(() => import('@/components/public/DescriptionExpander'), { ssr: false })
 
-const MapEmbedWrapper = dynamic(() =>
+const MapEmbedWrapper = nextDynamic(() =>
   import('@/components/public/MapEmbed').then(m => m.MapEmbed), { ssr: false }
 )
 
