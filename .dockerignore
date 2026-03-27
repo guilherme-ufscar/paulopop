@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.env*
+!.env.example
+coverage
+tests
+playwright-report
+test-results
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.npm
+public/uploads
