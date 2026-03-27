@@ -47,7 +47,7 @@ interface Config {
   smtpUser?: string
   smtpPassword?: string
   notificationEmail?: string
-  anthropicApiKey?: string
+  geminiApiKey?: string
   googleMapsKey?: string
   footerText?: string
 }
@@ -406,11 +406,11 @@ export default function ConfiguracoesPage() {
             <>
               <h2 className="font-semibold text-[#0D2F5E] text-lg">Integrações e Chaves de API</h2>
               <Field
-                label="Anthropic API Key (Claude)"
-                value={config.anthropicApiKey}
-                onChange={v => set('anthropicApiKey', v)}
+                label="Google Gemini API Key"
+                value={config.geminiApiKey}
+                onChange={v => set('geminiApiKey', v)}
                 type="password"
-                hint="Necessária para geração de descrições por IA"
+                hint="Obter em https://aistudio.google.com/app/apikey — necessária para geração de textos e análise de mercado"
               />
               <Field
                 label="Google Maps API Key"

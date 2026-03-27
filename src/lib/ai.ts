@@ -1,24 +1,19 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const MODEL = 'claude-sonnet-4-20250514'
+const GEMINI_MODEL = 'gemini-1.5-pro'
 
 function getClient() {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada')
-  return new Anthropic({ apiKey })
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) throw new Error('GEMINI_API_KEY não configurada')
+  return new GoogleGenerativeAI(apiKey)
 }
 
-/** Chama a Claude API e retorna o texto da resposta */
-async function callClaude(prompt: string, maxTokens = 2048): Promise<string> {
+/** Chama a Gemini API e retorna o texto da resposta */
+async function callGemini(prompt: string): Promise<string> {
   const client = getClient()
-  const msg = await client.messages.create({
-    model: MODEL,
-    max_tokens: maxTokens,
-    messages: [{ role: 'user', content: prompt }],
-  })
-  const block = msg.content[0]
-  if (block.type !== 'text') throw new Error('Resposta inesperada da Claude API')
-  return block.text.trim()
+  const model = client.getGenerativeModel({ model: GEMINI_MODEL })
+  const result = await model.generateContent(prompt)
+  return result.response.text().trim()
 }
 
 /** Extrai JSON de uma resposta que pode ter markdown ao redor */
@@ -150,7 +145,7 @@ Retorne APENAS um JSON válido (sem markdown, sem \`\`\`) com os campos:
   "descriptionEn": "Complete English description (300-500 words)"
 }`
 
-  const text = await callClaude(prompt, 3000)
+  const text = await callGemini(prompt)
   return extractJson<PropertyDescriptionOutput>(text)
 }
 
@@ -194,13 +189,13 @@ Retorne APENAS um JSON válido (sem markdown):
   "absoptionTime": number_em_dias,
   "avgPricePerSqmRegion": number_preco_medio_m2,
   "aiSummary": "Resumo executivo da análise em 2-3 parágrafos",
-  "aiStrengths": ["ponto forte 1", "ponto forte 2", ...],
-  "aiWeaknesses": ["ponto de atenção 1", ...],
-  "aiOpportunities": ["oportunidade 1", ...],
-  "aiRecommendations": ["recomendação 1", ...]
+  "aiStrengths": ["ponto forte 1", "ponto forte 2"],
+  "aiWeaknesses": ["ponto de atenção 1"],
+  "aiOpportunities": ["oportunidade 1"],
+  "aiRecommendations": ["recomendação 1"]
 }`
 
-  const text = await callClaude(prompt, 2500)
+  const text = await callGemini(prompt)
   return extractJson<MarketAnalysisOutput>(text)
 }
 
@@ -238,7 +233,7 @@ Crie um plano profissional e acionável com:
 
 Seja específico, prático e orientado a resultados. Use tabelas e listas quando apropriado.`
 
-  return callClaude(prompt, 3500)
+  return callGemini(prompt)
 }
 
 export async function generateContract(
@@ -297,5 +292,5 @@ export async function generateContract(
 - Inclua campos para data e assinatura no final
 - Espaçadores [____] para dados a preencher manualmente`
 
-  return callClaude(prompt, 4000)
+  return callGemini(prompt)
 }

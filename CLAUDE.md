@@ -905,7 +905,7 @@ model SiteConfig {
 - Ícone de IA (robô com laptop)
 - Título: "AI Text Toolkit"
 - Descrição do recurso
-- Ao clicar: abre painel que usa IA (Claude API) para gerar descrição baseada nos campos preenchidos na aba Principal
+- Ao clicar: abre painel que usa IA (Gemini API) para gerar descrição baseada nos campos preenchidos na aba Principal
 
 **Seletor de idioma**: Portuguese - Brazil | English
 
@@ -1077,7 +1077,7 @@ export async function generatePropertyDescription(propertyData: PropertyFormData
   marketingDescription: string
   surroundingsInfo: string
 }> {
-  // Usar Claude API (claude-sonnet-4-20250514)
+  // Usar Gemini API (gemini-1.5-pro)
   // Prompt: recebe todos os campos do imóvel e gera textos otimizados para SEO
   // Limite marketing description: 350 chars
 }
@@ -1369,7 +1369,7 @@ npx playwright test
     "zod": "latest",
     "bcryptjs": "latest",
     "cloudinary": "latest",
-    "@anthropic-ai/sdk": "latest",
+    
     "leaflet": "latest",
     "react-leaflet": "latest",
     "react-dropzone": "latest",
@@ -1468,36 +1468,27 @@ public/
     documents/  ← documentos dos imóveis
 ```
 
-### Como Rodar Localmente
+### Como Rodar com Docker (método padrão)
 
 ```bash
 # 1. Clonar o repositório
 git clone <url-do-repo>
 cd paulopop
 
-# 2. Instalar dependências
-npm install
-
-# 3. Configurar variáveis de ambiente
+# 2. Configurar variáveis de ambiente
 cp .env.example .env.local
-# Editar .env.local com suas credenciais
+# Editar .env.local — mínimo obrigatório:
+#   NEXTAUTH_SECRET=string-aleatoria-longa
+#   GEMINI_API_KEY=sua-chave-do-google-ai-studio
 
-# 4. Inicializar banco de dados
-npx prisma migrate dev --name init
+# 3. Subir tudo (build + banco + migrations + seed + app)
+docker compose up --build
 
-# 5. Criar admin inicial
-npm run db:seed
-
-# 6. Iniciar em desenvolvimento
-npm run dev
 # Acesse http://localhost:3000
-
-# 7. Rodar testes unitários
-npm test
-
-# 8. Rodar testes E2E (precisa do servidor rodando)
-npm run test:e2e
+# Admin: http://localhost:3000/admin
 ```
+
+Ver `DEPLOY.md` para todos os comandos Docker e instruções de produção.
 
 ### Como Fazer Deploy de Atualizações
 
@@ -1505,11 +1496,10 @@ npm run test:e2e
 # 1. Fazer as mudanças e commitar
 git add -A
 git commit -m "feat: descrição da mudança"
-git push origin master
-# A Vercel faz deploy automático
 
-# 2. Se mudou o schema do banco:
-npx prisma migrate deploy  # em produção
+# 2. Reconstruir os containers
+docker compose up --build
+# As migrations novas rodam automaticamente
 ```
 
 ### Como Adicionar Novos Tipos de Imóveis

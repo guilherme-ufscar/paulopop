@@ -1,141 +1,223 @@
-# Checklist de Deploy em Produção — Paulo Pop
+# Deploy Local com Docker — Paulo Pop
 
-## 1. Banco de Dados (Supabase ou PlanetScale)
-
-```bash
-# 1. Criar projeto no Supabase (https://supabase.com)
-# 2. Copiar a DATABASE_URL do painel de conexão
-# 3. Rodar migrations em produção
-npx prisma migrate deploy
-
-# 4. Criar usuário admin inicial
-npm run db:seed
-```
-
-**Verificar:** Acesse o Supabase Table Editor e confirme que a tabela `users` tem o admin criado.
+> Todo o ambiente roda em Docker: Next.js app + PostgreSQL + migrations/seed automáticos.
+> Nenhuma conta externa é necessária (exceto a API Key do Gemini para IA).
 
 ---
 
-## 2. Vercel
+## Pré-requisitos
 
-```bash
-# 1. Instalar Vercel CLI
-npm i -g vercel
-
-# 2. Login
-vercel login
-
-# 3. Linkar repositório
-vercel link
-
-# 4. Deploy inicial
-vercel --prod
-```
-
-### Variáveis de Ambiente na Vercel
-
-Configure todas as variáveis do `.env.example` no painel da Vercel:
-- `Settings > Environment Variables`
-
-| Variável | Obrigatória | Descrição |
-|---|---|---|
-| `DATABASE_URL` | ✅ | URL PostgreSQL (Supabase) |
-| `NEXTAUTH_SECRET` | ✅ | String aleatória segura (min 32 chars) |
-| `NEXTAUTH_URL` | ✅ | URL de produção (ex: https://paulopop.com.br) |
-| `ANTHROPIC_API_KEY` | ✅ | Para geração de textos por IA |
-| `GEMINI_API_KEY` | ✅ | Para análise de mercado |
-| `SMTP_HOST` | ✅ | Para e-mails de leads |
-| `SMTP_PORT` | ✅ | Porta SMTP (ex: 587) |
-| `SMTP_USER` | ✅ | Usuário SMTP |
-| `SMTP_PASSWORD` | ✅ | Senha SMTP |
-| `EMAIL_FROM` | ✅ | E-mail remetente |
-| `NOTIFICATION_EMAIL` | ✅ | E-mail do corretor para receber leads |
-| `NEXT_PUBLIC_SITE_URL` | ✅ | URL pública do site |
-| `NEXT_PUBLIC_SITE_NAME` | ✅ | Nome do site |
-| `NEXT_PUBLIC_WHATSAPP` | ✅ | Número WhatsApp com DDI |
-| `UPLOAD_DIR` | ✅ | `/public/uploads` |
-| `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | ❌ | Opcional |
-| `OPENCAGE_API_KEY` | ❌ | Para geocodificação |
-
-### Domínio Customizado
-
-1. `Vercel > Settings > Domains > Add Domain`
-2. Configurar DNS no seu provedor (A record para IPs da Vercel ou CNAME)
-3. Aguardar propagação (até 48h)
-4. HTTPS é configurado automaticamente pela Vercel
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando
+- [Git](https://git-scm.com/) para clonar o projeto
 
 ---
 
-## 3. Cloudinary (para imagens em produção)
+## Primeira vez — Setup completo
 
-> O sistema usa upload local por padrão. Para produção em Vercel, as imagens precisam de armazenamento externo.
+### 1. Clonar o repositório
 
 ```bash
-# 1. Criar conta em https://cloudinary.com
-# 2. Ir em Settings > Upload > Upload Presets > Add preset
-# 3. Configurar preset como "Unsigned" (ou "Signed" para maior segurança)
+git clone <url-do-repositorio>
+cd paulopop
 ```
 
-Adicionar variáveis:
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
+### 2. Configurar variáveis de ambiente
+
+```bash
+cp .env.example .env.local
+```
+
+Edite o `.env.local` e preencha pelo menos:
+
+```env
+# Obrigatório — gerar com: openssl rand -base64 32
+NEXTAUTH_SECRET=coloque-uma-string-aleatoria-longa-aqui
+
+# Obrigatório para IA — obter em https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=AIza...
+
+# URL pública do site
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+> O banco PostgreSQL e o upload de arquivos são gerenciados automaticamente pelo Docker.
+> Não é necessário configurar `DATABASE_URL` — o docker-compose já faz isso.
+
+### 3. Subir todos os serviços
+
+```bash
+docker compose up --build
+```
+
+Isso vai:
+1. Construir a imagem do Next.js
+2. Subir o PostgreSQL
+3. Rodar as migrations automaticamente (`prisma migrate deploy`)
+4. Criar o usuário admin inicial (`npm run db:seed`)
+5. Iniciar o servidor em `http://localhost:3000`
+
+**Aguarde até ver no terminal:**
+```
+paulopop_app  | ✓ Ready in Xs
+```
+
+### 4. Acessar
+
+| URL | Descrição |
+|---|---|
+| `http://localhost:3000` | Site público |
+| `http://localhost:3000/admin` | Painel administrativo |
+
+**Credenciais do admin:**
+- E-mail: `admin@paulopop.com.br`
+- Senha: `PauloPop@2025`
+
+> **⚠️ Altere a senha imediatamente** em `/admin/configuracoes`
 
 ---
 
-## 4. Pós-Deploy — Verificação Manual
+## Comandos do dia a dia
 
-### Acesso Admin
-- [ ] Acessar `https://seudominio.com.br/admin`
-- [ ] Fazer login com `admin@paulopop.com.br` / `PauloPop@2025`
-- [ ] **ALTERAR A SENHA IMEDIATAMENTE** em Configurações
+```bash
+# Subir em background (sem travar o terminal)
+docker compose up -d
 
-### Funcionalidades
-- [ ] Cadastrar um imóvel de teste e publicar
-- [ ] Verificar que aparece no frontend (`/imoveis`)
+# Ver logs em tempo real
+docker compose logs -f app
+
+# Parar todos os containers
+docker compose down
+
+# Parar e remover volumes (apaga banco e uploads — cuidado!)
+docker compose down -v
+
+# Reconstruir após mudanças no código
+docker compose up --build
+
+# Ver status dos containers
+docker compose ps
+```
+
+---
+
+## Atualizar o código (após git pull)
+
+```bash
+git pull origin master
+docker compose up --build
+```
+
+Se houver mudanças no schema do banco, as migrations rodam automaticamente no container `migrate`.
+
+---
+
+## Backup do banco de dados
+
+```bash
+# Fazer backup
+docker exec paulopop_postgres pg_dump -U paulopop paulopop > backup_$(date +%Y%m%d).sql
+
+# Restaurar backup
+docker exec -i paulopop_postgres psql -U paulopop paulopop < backup_20240101.sql
+```
+
+---
+
+## Backup dos uploads (imagens e documentos)
+
+Os arquivos ficam no volume Docker `paulopop_uploads_data`. Para copiar para o host:
+
+```bash
+# Copiar uploads para pasta local
+docker cp paulopop_app:/app/public/uploads ./uploads_backup
+```
+
+---
+
+## Rodar em produção (servidor Linux)
+
+No servidor Linux com Docker instalado:
+
+```bash
+# 1. Clonar e configurar
+git clone <url-do-repo>
+cd paulopop
+cp .env.example .env.local
+nano .env.local  # preencher as variáveis
+
+# 2. Subir em produção (daemon)
+docker compose up -d --build
+
+# 3. Verificar
+docker compose ps
+docker compose logs app
+```
+
+### Expor na internet com Nginx (opcional)
+
+Instale o Nginx no servidor e configure como proxy reverso:
+
+```nginx
+server {
+    listen 80;
+    server_name seudominio.com.br www.seudominio.com.br;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+```bash
+# Habilitar HTTPS com Let's Encrypt
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d seudominio.com.br
+```
+
+---
+
+## Checklist pós-deploy
+
+- [ ] Acessar `http://localhost:3000` e ver a home
+- [ ] Fazer login em `/admin` com as credenciais
+- [ ] **Trocar a senha padrão** em Configurações
+- [ ] Configurar foto, nome, CRECI e redes sociais nas Configurações
+- [ ] Testar cadastro e publicação de um imóvel
 - [ ] Testar formulário de lead no frontend
-- [ ] Confirmar e-mail de notificação foi recebido
-- [ ] Testar geração de descrição por IA (aba Descrição)
+- [ ] Testar geração de texto por IA (aba Descrição do imóvel)
 - [ ] Testar análise de mercado
-- [ ] Verificar galeria de imagens funcionando
-- [ ] Testar autopreenchimento de CEP
-
-### SEO
-- [ ] Verificar `https://seudominio.com.br/sitemap.xml`
-- [ ] Verificar `https://seudominio.com.br/robots.txt`
-- [ ] Testar OG tags com [Facebook Debugger](https://developers.facebook.com/tools/debug/)
-- [ ] Testar Twitter Card com [Card Validator](https://cards-dev.twitter.com/validator)
-- [ ] Submeter sitemap no [Google Search Console](https://search.google.com/search-console)
-
-### Performance
-- [ ] Rodar [PageSpeed Insights](https://pagespeed.web.dev/) na home
-- [ ] Verificar score > 85 no mobile
-
-### Segurança
-- [ ] Verificar headers de segurança em [Security Headers](https://securityheaders.com/)
-- [ ] Confirmar HTTPS ativo e certificado válido
-- [ ] Confirmar que `/api/admin/**` retorna 401 sem autenticação
+- [ ] Testar envio de e-mail (se SMTP configurado)
 
 ---
 
-## 5. Atualizações Futuras
+## Solução de problemas
 
+**App não inicia:**
 ```bash
-# 1. Fazer push das mudanças para o GitHub
-git push origin master
-
-# 2. A Vercel faz deploy automático (se GitHub integrado)
-# OU manualmente:
-vercel --prod
-
-# 3. Se houver mudanças no schema do banco:
-npx prisma migrate deploy
+docker compose logs app
 ```
 
----
+**Banco não conecta:**
+```bash
+docker compose logs postgres
+docker compose logs migrate
+```
 
-## 6. Monitoramento
+**Reconstruir do zero (apaga tudo):**
+```bash
+docker compose down -v
+docker compose up --build
+```
 
-- **Logs**: `Vercel > Project > Functions` (logs em tempo real)
-- **Erros**: Considerar integrar [Sentry](https://sentry.io) para rastreamento de erros
-- **Analytics**: Google Analytics ou Vercel Analytics (`vercel analytics enable`)
+**Ver tabelas do banco:**
+```bash
+docker exec -it paulopop_postgres psql -U paulopop -d paulopop -c "\dt"
+```
