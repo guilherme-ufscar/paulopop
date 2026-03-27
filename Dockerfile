@@ -11,7 +11,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV NEXTAUTH_SECRET="build-secret"
 RUN npm run build
+ENV DATABASE_URL=""
+ENV NEXTAUTH_SECRET=""
 
 FROM base AS runner
 WORKDIR /app

@@ -17,12 +17,6 @@ function createPrismaClient(): PrismaClient {
   })
 }
 
-// Lazy singleton — só cria a conexão na primeira chamada em runtime
-export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop: string | symbol) {
-    if (!globalForPrisma.prisma) {
-      globalForPrisma.prisma = createPrismaClient()
-    }
-    return Reflect.get(globalForPrisma.prisma, prop)
-  },
-})
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
