@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET || 'local-dev-nextauth-secret',
   session: {
     strategy: 'jwt',
   },
@@ -49,6 +50,21 @@ export const authOptions: NextAuthOptions = {
         ;(session.user as { role: string; id: string }).id = token.id as string
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      const adminUrl = `${baseUrl}/admin`
+
+      try {
+        const target = new URL(url, baseUrl)
+
+        if (target.origin !== baseUrl) return adminUrl
+        if (target.pathname === '/admin/login') return adminUrl
+        if (target.pathname.startsWith('/admin')) return target.toString()
+
+        return adminUrl
+      } catch {
+        return adminUrl
+      }
     },
   },
   pages: {

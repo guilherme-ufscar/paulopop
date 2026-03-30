@@ -28,7 +28,7 @@ export default function LoginPage() {
       setError('E-mail ou senha inválidos. Tente novamente.')
       setLoading(false)
     } else {
-      router.push('/admin')
+      router.replace('/admin')
     }
   }
 

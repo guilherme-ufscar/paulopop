@@ -22,12 +22,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const isLoginPage = pathname === '/admin/login'
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/admin/login')
+    if (status === 'authenticated' && isLoginPage) {
+      router.replace('/admin')
+      return
     }
-  }, [status, router])
+
+    if (status === 'unauthenticated' && !isLoginPage) {
+      router.replace('/admin/login')
+    }
+  }, [status, router, isLoginPage])
 
   // Fechar menu mobile ao trocar de rota
   useEffect(() => {
@@ -41,6 +47,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
     )
   }
+
+  if (isLoginPage) return <>{children}</>
 
   if (status === 'unauthenticated') return null
 

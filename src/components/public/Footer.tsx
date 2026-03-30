@@ -1,20 +1,21 @@
 import Link from 'next/link'
 
-const countries = [
-  'Angola', 'Brasil', 'Cabo Verde', 'França', 'Moçambique',
-  'Portugal', 'Reino Unido', 'Suíça', 'EUA', 'Emirados Árabes',
+const serviceRegions = [
+  'Belem', 'Ananindeua', 'Santarem', 'Barcarena', 'Castanhal',
+  'Salinopolis', 'Altamira', 'Maraba', 'Braganca', 'Macapa',
 ]
 
 const navLinks = [
-  { href: '/', label: 'Início' },
-  { href: '/imoveis', label: 'Imóveis' },
+  { href: '/', label: 'Inicio' },
+  { href: '/imoveis', label: 'Imoveis' },
   { href: '/sobre', label: 'Sobre Mim' },
   { href: '/contato', label: 'Contato' },
 ]
 
 const institutionalLinks = [
-  { href: 'https://www.remax.com', label: 'RE/MAX Internacional' },
-  { href: 'https://www.remax.eu', label: 'RE/MAX Europa' },
+  { href: '/imoveis?transacao=comprar', label: 'Imoveis para Comprar' },
+  { href: '/imoveis?transacao=alugar', label: 'Imoveis para Alugar' },
+  { href: '/contato', label: 'Atendimento Personalizado' },
 ]
 
 interface FooterProps {
@@ -29,19 +30,17 @@ export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
     <footer className="bg-[#0D2F5E] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Coluna 1 — Logo e descrição */}
           <div className="lg:col-span-1">
             <p className="font-display text-2xl font-bold mb-2">{ownerName}</p>
             {ownerCompany && (
               <p className="text-blue-300 text-sm mb-4">{ownerCompany}</p>
             )}
             <p className="text-blue-200 text-sm leading-relaxed">
-              Corretor de imóveis especializado em compra, venda e aluguel.
-              Atendimento personalizado para encontrar o imóvel dos seus sonhos.
+              Plataforma imobiliaria com foco em compra, venda e aluguel.
+              Atendimento consultivo para encontrar o imovel certo em cada momento.
             </p>
           </div>
 
-          {/* Coluna 2 — Links institucionais */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-widest text-blue-300 mb-4">
               Institucional
@@ -49,14 +48,12 @@ export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
             <ul className="space-y-2">
               {institutionalLinks.map(link => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="text-blue-200 hover:text-white text-sm transition-colors"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
               {navLinks.map(link => (
@@ -72,21 +69,19 @@ export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
             </ul>
           </div>
 
-          {/* Coluna 3 — Países */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-widest text-blue-300 mb-4">
-              Países
+              Regioes de Atendimentos
             </h3>
             <ul className="grid grid-cols-2 gap-1">
-              {countries.map(country => (
-                <li key={country}>
-                  <span className="text-blue-200 text-sm">{country}</span>
+              {serviceRegions.map(region => (
+                <li key={region}>
+                  <span className="text-blue-200 text-sm">{region}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Coluna 4 — Legal */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-widest text-blue-300 mb-4">
               Legal
@@ -97,7 +92,7 @@ export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
                   href="/politica-de-privacidade"
                   className="text-blue-200 hover:text-white text-sm transition-colors"
                 >
-                  Política de Privacidade
+                  Politica de Privacidade
                 </Link>
               </li>
               <li>
@@ -113,14 +108,13 @@ export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
                   href="/admin"
                   className="text-blue-200/50 hover:text-blue-200 text-xs transition-colors"
                 >
-                  Área do Corretor
+                  Area do Corretor
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Linha divisória */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-blue-300">
           <p>© {currentYear} {ownerName}. Todos os direitos reservados.</p>
           <p>Desenvolvido com Next.js</p>

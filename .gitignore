@@ -32,6 +32,13 @@ yarn-error.log*
 # uploads (arquivos locais, não comitar)
 /public/uploads/
 
+# variáveis de ambiente (não comitar)
+.env
+
+# artefatos de teste
+/playwright-report/
+/test-results/
+
 # vercel
 .vercel
 

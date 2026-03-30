@@ -281,7 +281,6 @@ export default function ImoveisPage({ searchParams }: { searchParams: SearchPara
                     id="ordem"
                     name="ordem"
                     defaultValue={searchParams.ordem ?? 'recente'}
-                    onChange={e => (e.currentTarget.form as HTMLFormElement).submit()}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2E86DE]"
                     aria-label="Ordenar imóveis"
                   >
@@ -289,6 +288,12 @@ export default function ImoveisPage({ searchParams }: { searchParams: SearchPara
                       <option key={o.value} value={o.value}>{o.label}</option>
                     ))}
                   </select>
+                  <button
+                    type="submit"
+                    className="ml-2 px-3 py-2 text-sm font-medium rounded-lg border border-[#0D2F5E] text-[#0D2F5E] hover:bg-[#0D2F5E] hover:text-white transition-colors"
+                  >
+                    Aplicar
+                  </button>
                 </form>
               </div>
             </div>

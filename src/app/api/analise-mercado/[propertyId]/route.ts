@@ -6,12 +6,17 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateMarketAnalysis } from '@/lib/ai'
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  return 'Erro ao gerar analise de mercado'
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { propertyId: string } }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!session?.user) return NextResponse.json({ error: 'Nao autorizado' }, { status: 401 })
 
   const property = await prisma.property.findUnique({
     where: { id: params.propertyId },
@@ -19,9 +24,9 @@ export async function POST(
       features: true,
     },
   })
-  if (!property) return NextResponse.json({ error: 'Imóvel não encontrado' }, { status: 404 })
 
-  // Buscar comparáveis: mesmo tipo, mesma cidade, status ACTIVE ou SOLD, últimos 12 meses
+  if (!property) return NextResponse.json({ error: 'Imovel nao encontrado' }, { status: 404 })
+
   const twelveMonthsAgo = new Date()
   twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1)
 
@@ -45,14 +50,25 @@ export async function POST(
     orderBy: { createdAt: 'desc' },
   })
 
+  let analysisRecordId: string | null = null
+
   try {
-    // Criar registro de análise com status PROCESSING
     const analysisRecord = await prisma.marketAnalysis.create({
       data: {
         propertyId: params.propertyId,
         status: 'PROCESSING',
       },
     })
+    analysisRecordId = analysisRecord.id
+
+    const normalizedComparables = comparables.map(comparable => ({
+      propertyType: comparable.propertyType,
+      totalArea: comparable.totalArea ? Number(comparable.totalArea) : null,
+      price: comparable.price ? Number(comparable.price) : null,
+      status: comparable.status,
+      neighborhood: comparable.neighborhood,
+      createdAt: comparable.createdAt.toISOString(),
+    }))
 
     const result = await generateMarketAnalysis({
       propertyType: property.propertyType,
@@ -62,18 +78,10 @@ export async function POST(
       totalArea: property.totalArea ? Number(property.totalArea) : null,
       bedrooms: property.bedrooms,
       price: property.price ? Number(property.price) : null,
-      features: property.features.map(f => f.feature),
-      comparables: comparables.map(c => ({
-        propertyType: c.propertyType,
-        totalArea: c.totalArea ? Number(c.totalArea) : null,
-        price: c.price ? Number(c.price) : null,
-        status: c.status,
-        neighborhood: c.neighborhood,
-        createdAt: c.createdAt.toISOString(),
-      })),
+      features: property.features.map(feature => feature.feature),
+      comparables: normalizedComparables,
     })
 
-    // Atualizar registro com os resultados
     const updated = await prisma.marketAnalysis.update({
       where: { id: analysisRecord.id },
       data: {
@@ -90,14 +98,22 @@ export async function POST(
         aiWeaknesses: result.aiWeaknesses,
         aiOpportunities: result.aiOpportunities,
         aiRecommendations: result.aiRecommendations,
-        comparables: comparables,
+        comparables: normalizedComparables,
       },
     })
 
     return NextResponse.json(updated)
-  } catch (err) {
-    console.error('[AnalyseMercado] Erro:', err)
-    return NextResponse.json({ error: 'Erro ao gerar análise de mercado' }, { status: 500 })
+  } catch (error) {
+    console.error('[AnalyseMercado] Erro:', error)
+
+    if (analysisRecordId) {
+      await prisma.marketAnalysis.updateMany({
+        where: { id: analysisRecordId },
+        data: { status: 'FAILED' },
+      })
+    }
+
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
@@ -106,7 +122,7 @@ export async function GET(
   { params }: { params: { propertyId: string } }
 ) {
   const session = await getServerSession(authOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!session?.user) return NextResponse.json({ error: 'Nao autorizado' }, { status: 401 })
 
   const analyses = await prisma.marketAnalysis.findMany({
     where: { propertyId: params.propertyId },

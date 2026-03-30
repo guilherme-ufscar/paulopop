@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const GEMINI_MODEL = 'gemini-1.5-pro'
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 
 function getClient() {
   const apiKey = process.env.GEMINI_API_KEY
@@ -12,8 +12,16 @@ function getClient() {
 async function callGemini(prompt: string): Promise<string> {
   const client = getClient()
   const model = client.getGenerativeModel({ model: GEMINI_MODEL })
-  const result = await model.generateContent(prompt)
-  return result.response.text().trim()
+  try {
+    const result = await model.generateContent(prompt)
+    return result.response.text().trim()
+  } catch (error) {
+    if (error instanceof Error && /not found|not supported/i.test(error.message)) {
+      throw new Error(`Modelo Gemini indisponivel: ${GEMINI_MODEL}. Configure GEMINI_MODEL com um modelo valido.`)
+    }
+
+    throw error
+  }
 }
 
 /** Extrai JSON de uma resposta que pode ter markdown ao redor */

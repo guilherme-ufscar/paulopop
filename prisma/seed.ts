@@ -1,45 +1,271 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 import bcrypt from 'bcryptjs'
 
-const prisma = new PrismaClient()
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) throw new Error('DATABASE_URL nao configurada para o seed')
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString }),
+})
+
+function slugify(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+const imageSets = {
+  apto: [
+    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80',
+  ],
+  casa: [
+    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80',
+  ],
+  comercial: [
+    'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1497366412874-3415097a27e7?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1600&q=80',
+  ],
+  terreno: [
+    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1600&q=80',
+  ],
+}
+
+const videoUrls = [
+  'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+  'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+  'https://www.youtube.com/watch?v=jNQXAC9IVRw',
+  'https://www.youtube.com/watch?v=ysz5S6PUM-U',
+]
+
+const sampleProperties = [
+  ['PP-001', 'Apartamento com varanda gourmet em Umarizal', 'Apartamento', 'SALE', 'RESIDENTIAL', 'Belem', 'PA', 'Umarizal', 890000, 138, 3, 4, 2, 'apto'],
+  ['PP-002', 'Casa com piscina em Cidade Nova', 'Casa', 'SALE', 'RESIDENTIAL', 'Ananindeua', 'PA', 'Cidade Nova', 690000, 240, 4, 4, 3, 'casa'],
+  ['PP-003', 'Studio mobiliado em Nazare', 'Studio', 'RENT', 'RESIDENTIAL', 'Belem', 'PA', 'Nazare', 3600, 42, 1, 1, 1, 'apto'],
+  ['PP-004', 'Terreno comercial em avenida de grande fluxo', 'Terreno', 'SALE', 'COMMERCIAL', 'Belem', 'PA', 'Marco', 1250000, 900, 0, 0, 0, 'terreno'],
+  ['PP-005', 'Cobertura duplex com vista aberta', 'Cobertura', 'SALE', 'RESIDENTIAL', 'Belem', 'PA', 'Batista Campos', 1890000, 260, 4, 5, 3, 'apto'],
+  ['PP-006', 'Sala comercial pronta para consultorio', 'Sala Comercial', 'RENT', 'COMMERCIAL', 'Belem', 'PA', 'Umarizal', 5200, 68, 0, 2, 1, 'comercial'],
+  ['PP-007', 'Casa de praia mobiliada em Salinopolis', 'Casa', 'SALE', 'RESIDENTIAL', 'Salinopolis', 'PA', 'Atalaia', 980000, 320, 5, 5, 4, 'casa'],
+  ['PP-008', 'Loja com mezanino em Batista Campos', 'Loja', 'RENT', 'COMMERCIAL', 'Belem', 'PA', 'Batista Campos', 8900, 145, 0, 2, 0, 'comercial'],
+  ['PP-009', 'Apartamento compacto para investimento', 'Apartamento', 'SALE', 'RESIDENTIAL', 'Belem', 'PA', 'Marco', 420000, 64, 2, 2, 1, 'apto'],
+  ['PP-010', 'Chacara com lago e area verde', 'Chacara', 'SALE', 'RESIDENTIAL', 'Castanhal', 'PA', 'Zona Rural', 1150000, 1200, 4, 4, 6, 'casa'],
+] as const
+
+async function upsertAdmin() {
+  const password = await bcrypt.hash('admin123', 12)
+
+  return prisma.user.upsert({
+    where: { email: 'admin@paulopop.com.br' },
+    update: {
+      name: 'Paulo Pop',
+      password,
+      role: 'SUPER_ADMIN',
+      creci: '12345-F',
+      company: 'Paulo Pop Imoveis',
+      phone: '(91) 3255-1000',
+      whatsapp: '(91) 99111-0000',
+      active: true,
+    },
+    create: {
+      name: 'Paulo Pop',
+      email: 'admin@paulopop.com.br',
+      password,
+      role: 'SUPER_ADMIN',
+      creci: '12345-F',
+      company: 'Paulo Pop Imoveis',
+      phone: '(91) 3255-1000',
+      whatsapp: '(91) 99111-0000',
+      active: true,
+    },
+  })
+}
+
+async function upsertConfig() {
+  const config = await prisma.siteConfig.findFirst()
+  const data = {
+    ownerName: 'Paulo Pop',
+    ownerCreci: '12345-F',
+    ownerCompany: 'Paulo Pop Imoveis',
+    ownerWhatsapp: '(91) 99111-0000',
+    ownerPhone: '(91) 3255-1000',
+    ownerEmail: 'contato@paulopop.com.br',
+    ownerAddress: 'Belem, Para',
+    metaTitle: 'Paulo Pop | Corretor de Imoveis',
+    metaDescription: 'Imoveis para compra, venda e aluguel com atendimento consultivo.',
+    heroTitle: 'Encontre o proximo imovel com a consultoria de Paulo Pop',
+    heroSubtitle: 'Compra, venda e aluguel de imoveis com atendimento consultivo.',
+    whatsappMessage: 'Ola Paulo! Vi um imovel no site e gostaria de mais informacoes.',
+  }
+
+  if (config) return prisma.siteConfig.update({ where: { id: config.id }, data })
+  return prisma.siteConfig.create({ data })
+}
+
+async function upsertOwner(index: number, name: string) {
+  return prisma.contact.upsert({
+    where: { cpf: `900000000${index.toString().padStart(2, '0')}` },
+    update: {
+      name,
+      type: 'OWNER',
+      email: `proprietario${index}@exemplo.com`,
+      phone: `(91) 3255-11${index.toString().padStart(2, '0')}`,
+      whatsapp: `(91) 99111-11${index.toString().padStart(2, '0')}`,
+    },
+    create: {
+      name,
+      cpf: `900000000${index.toString().padStart(2, '0')}`,
+      type: 'OWNER',
+      email: `proprietario${index}@exemplo.com`,
+      phone: `(91) 3255-11${index.toString().padStart(2, '0')}`,
+      whatsapp: `(91) 99111-11${index.toString().padStart(2, '0')}`,
+    },
+  })
+}
+
+async function upsertProperty(entry: (typeof sampleProperties)[number], index: number, agentId: string) {
+  const [ref, title, propertyType, transactionType, purpose, city, state, neighborhood, price, totalArea, bedrooms, bathrooms, parking, imageKey] = entry
+  const owner = await upsertOwner(index + 1, `Proprietario ${index + 1}`)
+  const slug = slugify(`${ref}-${title}`)
+  const images = imageSets[imageKey as keyof typeof imageSets]
+  const baseData = {
+    ref,
+    slug,
+    title,
+    purpose,
+    transactionType,
+    location: 'BRAZIL' as const,
+    status: 'ACTIVE' as const,
+    contractType: transactionType === 'RENT' ? 'AUTHORIZATION' as const : 'EXCLUSIVE' as const,
+    hideOnSite: false,
+    propertyType,
+    marketStatus: 'DISPONIVEL',
+    condition: 'PRONTO',
+    category: purpose === 'COMMERCIAL' ? 'COMERCIAL' : 'RESIDENCIAL',
+    price,
+    priceType: 'FIXED' as const,
+    pricePerSqm: Number((price / totalArea).toFixed(2)),
+    totalArea,
+    usefulArea: totalArea,
+    bedrooms,
+    bathrooms,
+    suites: bedrooms > 0 ? Math.min(2, bedrooms) : 0,
+    environments: Math.max(3, bedrooms + 2),
+    totalParkingSpots: parking,
+    zipCode: `66000-${(100 + index).toString().padStart(3, '0')}`,
+    address: `Endereco ${index + 1}`,
+    number: `${100 + index}`,
+    neighborhood,
+    city,
+    state,
+    showFullAddress: true,
+    titleEn: title,
+    description: `${title}. Imovel de exemplo criado pela seed com dados prontos para navegacao, testes e demonstracao da plataforma.`,
+    marketingDescription: `${title} em ${neighborhood}, ${city}. Imovel de exemplo com informacoes completas, imagens, video e documento para validar a experiencia do sistema.`,
+    surroundingsInfo: `A regiao de ${neighborhood} em ${city} oferece infraestrutura, acesso e um contexto imobiliario interessante para quem busca praticidade e boa localizacao.`,
+    ownerId: owner.id,
+    ownerName: owner.name,
+    agentId,
+    virtualTourType: 'OTHER' as const,
+    virtualTourUrl: videoUrls[index % videoUrls.length],
+    externalLink: `https://paulopop.com.br/imoveis/${slug}`,
+    publishedAt: new Date('2026-03-20T12:00:00.000Z'),
+  }
+
+  const nestedData = {
+    features: {
+      create: ['GARAGE', 'AIR_CONDITIONING', 'SECURITY_24H'].slice(0, bedrooms > 0 ? 3 : 2).map(feature => ({ feature: feature as never })),
+    },
+    lifestyles: {
+      create: [purpose === 'COMMERCIAL' ? 'INVESTMENT' : 'METROPOLIS'].map(lifestyle => ({ lifestyle: lifestyle as never })),
+    },
+    rooms: {
+      create: [
+        { name: 'Sala principal', area: Math.max(18, Math.round(totalArea * 0.2)) },
+        ...(bedrooms > 0 ? [{ name: 'Suite principal', area: 14 }] : []),
+      ],
+    },
+    parkingSpots: {
+      create: parking > 0 ? [{ quantity: parking, type: 'Coberta' }] : [],
+    },
+    images: {
+      create: images.map((url, order) => ({
+        url,
+        thumbnailUrl: url,
+        alt: title,
+        caption: `${title} - imagem ${order + 1}`,
+        order,
+        isCover: order === 0,
+      })),
+    },
+    videos: {
+      create: [{ youtubeUrl: videoUrls[index % videoUrls.length], platform: 'YOUTUBE' }],
+    },
+    documents: {
+      create: [{
+        name: `Apresentacao-${ref}.pdf`,
+        url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        type: 'PDF',
+        size: 125000 + index * 1000,
+        isPublic: true,
+      }],
+    },
+    portals: {
+      create: [
+        { portalName: 'ZAP', active: true, externalId: `zap-${ref.toLowerCase()}` },
+        { portalName: 'VivaReal', active: true, externalId: `vr-${ref.toLowerCase()}` },
+      ],
+    },
+  }
+
+  const existing = await prisma.property.findUnique({ where: { ref }, select: { id: true } })
+
+  if (!existing) {
+    await prisma.property.create({ data: { ...baseData, ...nestedData } })
+    return
+  }
+
+  await prisma.property.update({
+    where: { ref },
+    data: {
+      ...baseData,
+      features: { deleteMany: {}, create: nestedData.features.create },
+      lifestyles: { deleteMany: {}, create: nestedData.lifestyles.create },
+      rooms: { deleteMany: {}, create: nestedData.rooms.create },
+      parkingSpots: { deleteMany: {}, create: nestedData.parkingSpots.create },
+      images: { deleteMany: {}, create: nestedData.images.create },
+      videos: { deleteMany: {}, create: nestedData.videos.create },
+      documents: { deleteMany: {}, create: nestedData.documents.create },
+      portals: { deleteMany: {}, create: nestedData.portals.create },
+    },
+  })
+}
 
 async function main() {
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: 'admin@paulopop.com.br' },
-  })
+  const admin = await upsertAdmin()
+  await upsertConfig()
 
-  if (!existingAdmin) {
-    const hashedPassword = await bcrypt.hash('admin123', 12)
-    await prisma.user.create({
-      data: {
-        name: 'Paulo Pop',
-        email: 'admin@paulopop.com.br',
-        password: hashedPassword,
-        role: 'SUPER_ADMIN',
-        creci: '12345-F',
-        company: 'Paulo Pop Imóveis',
-      },
-    })
-    console.log('Admin criado: admin@paulopop.com.br / admin123')
+  for (let index = 0; index < sampleProperties.length; index += 1) {
+    await upsertProperty(sampleProperties[index], index, admin.id)
   }
 
-  const existingConfig = await prisma.siteConfig.findFirst()
-  if (!existingConfig) {
-    await prisma.siteConfig.create({
-      data: {
-        ownerName: 'Paulo Pop',
-        ownerCreci: '12345-F',
-        ownerCompany: 'Paulo Pop Imóveis',
-        metaTitle: 'Paulo Pop | Corretor de Imóveis',
-        metaDescription: 'Encontre o imóvel dos seus sonhos com Paulo Pop.',
-        heroTitle: 'Encontre o imóvel dos seus sonhos',
-        heroSubtitle: 'Especialista em compra, venda e aluguel de imóveis.',
-        whatsappMessage: 'Olá Paulo! Vi seu site e gostaria de mais informações sobre um imóvel.',
-      },
-    })
-  }
+  console.log('Admin pronto: admin@paulopop.com.br / admin123')
+  console.log('10 imoveis de exemplo cadastrados com imagens, videos e documentos.')
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1) })
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
   .finally(() => prisma.$disconnect())
