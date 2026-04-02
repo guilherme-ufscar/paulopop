@@ -21,6 +21,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
 RUN npx tsc prisma/seed.ts --module commonjs --target es2020 --moduleResolution node --esModuleInterop --outDir dist-scripts --skipLibCheck
+RUN mkdir -p /app/public
 RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 FROM node:20-alpine AS runner
