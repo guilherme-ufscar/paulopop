@@ -141,7 +141,7 @@ export function Header() {
                 </button>
 
                 {desktopDropdownOpen && (
-                  <div className="absolute left-0 top-full mt-3 w-64 rounded-[24px] border border-slate-200 bg-white p-3 shadow-[0_24px_60px_-30px_rgba(8,30,63,0.35)]">
+                  <div className="absolute left-0 top-full w-64 rounded-[24px] border border-slate-200 bg-white pt-6 pb-3 px-3 shadow-[0_24px_60px_-30px_rgba(8,30,63,0.35)]">
                     <div className="flex flex-col gap-1" role="menu" aria-label="Categorias de imoveis">
                       {propertyCategories.map(category => (
                         <Link
