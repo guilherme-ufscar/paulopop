@@ -9,7 +9,7 @@ export async function saveImage(file: File): Promise<{ url: string; thumbnailUrl
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
 
-  const dir = path.join(process.cwd(), UPLOAD_BASE, 'images')
+  const dir = path.resolve(UPLOAD_BASE, 'images')
   await fs.mkdir(dir, { recursive: true })
 
   const ext = 'webp'
@@ -38,7 +38,7 @@ export async function saveDocument(file: File): Promise<{ url: string; size: num
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
 
-  const dir = path.join(process.cwd(), UPLOAD_BASE, 'documents')
+  const dir = path.resolve(UPLOAD_BASE, 'documents')
   await fs.mkdir(dir, { recursive: true })
 
   const originalExt = file.name.split('.').pop() ?? 'bin'

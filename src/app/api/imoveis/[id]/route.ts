@@ -46,6 +46,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   if (data.surroundingsInfo) data.surroundingsInfo = sanitizeHtml(data.surroundingsInfo)
   if (data.descriptionEn) data.descriptionEn = sanitizeHtml(data.descriptionEn)
 
+  // Converter strings vazias de campos DateTime para null
+  const dateFields = ['expiryDate', 'availabilityDate', 'publishedAt']
+  for (const field of dateFields) {
+    if (data[field] === '') data[field] = null
+  }
+
   const property = await prisma.property.update({
     where: { id: params.id },
     data: {
