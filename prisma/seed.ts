@@ -251,6 +251,115 @@ async function upsertProperty(entry: (typeof sampleProperties)[number], index: n
   })
 }
 
+async function upsertTestProperty(agentId: string) {
+  const ref = 'TEST-PUBLISH'
+  const slug = 'apartamento-teste-publicacao-completo'
+  const existing = await prisma.property.findUnique({ where: { ref }, select: { id: true } })
+
+  const baseData = {
+    ref,
+    slug,
+    title: '[TESTE] Apartamento completo para publicação',
+    purpose: 'RESIDENTIAL' as const,
+    transactionType: 'SALE' as const,
+    location: 'BRAZIL' as const,
+    status: 'DRAFT' as const,
+    contractType: 'EXCLUSIVE' as const,
+    hideOnSite: false,
+    propertyType: 'Apartamento',
+    marketStatus: 'Disponível',
+    condition: 'Novo',
+    registrationDate: new Date('2026-01-01T00:00:00.000Z'),
+    price: 850000,
+    priceType: 'FIXED' as const,
+    pricePerSqm: 6071,
+    hidePrice: false,
+    iptu: 3600,
+    iptuPeriod: 'Anual',
+    condominiumFee: 950,
+    condominiumFeePeriod: 'Mensal',
+    captureCommissionPct: 6,
+    captureCommissionType: 'PERCENTAGE' as const,
+    saleCommissionPct: 6,
+    saleCommissionType: 'PERCENTAGE' as const,
+    totalArea: 140,
+    usefulArea: 128,
+    floors: 12,
+    environments: 5,
+    bedrooms: 3,
+    bathrooms: 3,
+    suites: 2,
+    totalParkingSpots: 2,
+    zipCode: '01310-100',
+    address: 'Avenida Paulista',
+    number: '1000',
+    complement: 'Apto 121',
+    landmark: 'Próximo à estação MASP',
+    neighborhood: 'Bela Vista',
+    city: 'São Paulo',
+    state: 'SP',
+    region: 'Sudeste',
+    showFullAddress: true,
+    latitude: -23.5613,
+    longitude: -46.6558,
+    keyNumber: 'APT-121',
+    title: '[TESTE] Apartamento completo para publicação',
+    description: 'Apartamento de alto padrão localizado na Avenida Paulista, região nobre de São Paulo. Três suítes, dois banheiros sociais, sala ampla com varanda gourmet e cozinha planejada. Dois vagas de garagem cobertas. Condomínio completo com academia, piscina e salão de festas. Pronto para morar.',
+    marketingDescription: 'Viva o melhor de São Paulo neste sofisticado apartamento na Avenida Paulista. Alto padrão, localização privilegiada e infraestrutura completa de lazer. Agende uma visita e surpreenda-se.',
+    surroundingsInfo: 'A Avenida Paulista é o coração financeiro e cultural de São Paulo. A poucos metros do MASP, estação de metrô, restaurantes, hospitais e shoppings. Infraestrutura completa e fácil acesso a toda a cidade.',
+    agentId,
+    virtualTourType: 'NONE' as const,
+  }
+
+  const nestedData = {
+    features: {
+      create: ['GARAGE', 'AIR_CONDITIONING', 'SECURITY_24H', 'POOL', 'GYM'].map(f => ({ feature: f as never })),
+    },
+    lifestyles: {
+      create: [{ lifestyle: 'METROPOLIS' as never }],
+    },
+    rooms: {
+      create: [
+        { name: 'Sala de estar', area: 32 },
+        { name: 'Suite principal', area: 22 },
+        { name: 'Suite 2', area: 16 },
+        { name: 'Quarto 3', area: 14 },
+        { name: 'Cozinha', area: 18 },
+      ],
+    },
+    parkingSpots: {
+      create: [{ quantity: 2, type: 'Coberta' }],
+    },
+    images: {
+      create: [
+        { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=400&q=75', alt: 'Sala de estar', caption: 'Ampla sala de estar com varanda', order: 0, isCover: true },
+        { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=400&q=75', alt: 'Cozinha', caption: 'Cozinha planejada com ilha', order: 1, isCover: false },
+        { url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1600&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=75', alt: 'Suite principal', caption: 'Suite principal com closet', order: 2, isCover: false },
+        { url: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1600&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=400&q=75', alt: 'Banheiro', caption: 'Banheiro com acabamento premium', order: 3, isCover: false },
+      ],
+    },
+  }
+
+  if (!existing) {
+    await prisma.property.create({ data: { ...baseData, ...nestedData } })
+    console.log('Imóvel de teste (DRAFT) criado: ref TEST-PUBLISH')
+    return
+  }
+
+  await prisma.property.update({
+    where: { ref },
+    data: {
+      ...baseData,
+      features: { deleteMany: {}, create: nestedData.features.create },
+      lifestyles: { deleteMany: {}, create: nestedData.lifestyles.create },
+      rooms: { deleteMany: {}, create: nestedData.rooms.create },
+      parkingSpots: { deleteMany: {}, create: nestedData.parkingSpots.create },
+      images: { deleteMany: {}, create: nestedData.images.create },
+    },
+  })
+  console.log('Imóvel de teste (DRAFT) atualizado: ref TEST-PUBLISH')
+}
+
 async function main() {
   const admin = await upsertAdmin()
   await upsertConfig()
@@ -259,8 +368,11 @@ async function main() {
     await upsertProperty(sampleProperties[index], index, admin.id)
   }
 
+  await upsertTestProperty(admin.id)
+
   console.log('Admin pronto: admin@paulopop.com.br / admin123')
   console.log('10 imoveis de exemplo cadastrados com imagens, videos e documentos.')
+  console.log('Imovel TEST-PUBLISH em DRAFT pronto para testar publicacao.')
 }
 
 main()
