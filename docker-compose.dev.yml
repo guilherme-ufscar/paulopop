@@ -1,4 +1,20 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: paulopop_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: paulopop
+      POSTGRES_PASSWORD: paulopop123
+      POSTGRES_DB: paulopop
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paulopop -d paulopop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     image: node:20-alpine
     container_name: paulopop_app_dev
@@ -9,7 +25,7 @@ services:
       - .env.local
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://paulopop:paulopop123@paulopop_postgres:5432/paulopop
+      DATABASE_URL: postgresql://paulopop:paulopop123@paulopop_postgres_dev:5432/paulopop
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-local-dev-nextauth-secret}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       NEXTAUTH_URL_INTERNAL: http://app:3000
@@ -34,14 +50,10 @@ services:
       - /app/node_modules
       - /app/.next
       - uploads_dev_data:/app/public/uploads
-    networks:
-      - default
-      - paulopopdocker_default
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
+  postgres_dev_data:
   uploads_dev_data:
-
-networks:
-  default:
-  paulopopdocker_default:
-    external: true
