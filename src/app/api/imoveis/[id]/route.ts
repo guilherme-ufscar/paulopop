@@ -46,27 +46,30 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   if (data.surroundingsInfo) data.surroundingsInfo = sanitizeHtml(data.surroundingsInfo)
   if (data.descriptionEn) data.descriptionEn = sanitizeHtml(data.descriptionEn)
 
-  // DateTime nullable: string vazia ou data inválida vira null
+  // Converte valor de data para ISO-8601 DateTime completo, ou null se inválido
+  function parseDate(value: unknown): string | null {
+    if (value === '' || value === null || value === undefined) return null
+    if (typeof value !== 'string') return null
+    // Formato date-only YYYY-MM-DD → converte para datetime UTC
+    if (/^\d{1,4}-\d{2}-\d{2}$/.test(value)) {
+      const parsed = new Date(`${value}T00:00:00.000Z`)
+      return isNaN(parsed.getTime()) ? null : parsed.toISOString()
+    }
+    const parsed = new Date(value)
+    return isNaN(parsed.getTime()) ? null : value
+  }
+
+  // DateTime nullable: string vazia, formato parcial ou inválido vira null
   const nullableDateFields = ['expiryDate', 'availabilityDate', 'publishedAt']
   for (const field of nullableDateFields) {
-    const value = data[field]
-    if (value === '' || value === undefined) {
-      data[field] = null
-    } else if (typeof value === 'string') {
-      const parsed = new Date(value)
-      if (isNaN(parsed.getTime())) data[field] = null
-    }
+    data[field] = parseDate(data[field])
   }
 
   // DateTime não-nullable (registrationDate): remove do update se vazio/inválido
   if ('registrationDate' in data) {
-    const value = data.registrationDate
-    const invalid =
-      value === '' ||
-      value === null ||
-      value === undefined ||
-      (typeof value === 'string' && isNaN(new Date(value).getTime()))
-    if (invalid) delete data.registrationDate
+    const parsed = parseDate(data.registrationDate)
+    if (parsed) data.registrationDate = parsed
+    else delete data.registrationDate
   }
 
   // Campos numéricos (Int e Decimal): string vazia vira null
