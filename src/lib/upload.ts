@@ -60,8 +60,11 @@ export async function saveDocument(file: File): Promise<{ url: string; size: num
 }
 
 export async function deleteFile(url: string): Promise<void> {
-  const relativePath = url.replace(/^\//, '')
-  const fullPath = path.join(process.cwd(), 'public', relativePath)
+  // URL ex: /uploads/images/xxx.webp → segments: ['images', 'xxx.webp']
+  const segments = url.replace(/^\/uploads\//, '').split('/')
+  const fullPath = path.isAbsolute(UPLOAD_BASE)
+    ? path.join(UPLOAD_BASE, ...segments)
+    : path.join(process.cwd(), UPLOAD_BASE, ...segments)
   try {
     await fs.unlink(fullPath)
   } catch {
