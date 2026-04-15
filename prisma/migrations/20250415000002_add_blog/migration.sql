@@ -25,5 +25,11 @@ CREATE TABLE IF NOT EXISTS "blog_posts" (
 CREATE UNIQUE INDEX IF NOT EXISTS "blog_posts_slug_key" ON "blog_posts"("slug");
 CREATE INDEX IF NOT EXISTS "blog_posts_status_publishedAt_idx" ON "blog_posts"("status", "publishedAt");
 
-ALTER TABLE "blog_posts" ADD CONSTRAINT IF NOT EXISTS "blog_posts_authorId_fkey"
-  FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'blog_posts_authorId_fkey'
+  ) THEN
+    ALTER TABLE "blog_posts" ADD CONSTRAINT "blog_posts_authorId_fkey"
+      FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
