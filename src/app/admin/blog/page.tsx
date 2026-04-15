@@ -91,6 +91,3 @@ export default async function AdminBlogPage({
     </div>
   )
 }
-
-// Ícones exportados para uso no client
-export { Pencil, Globe, FileText, Trash2 }
