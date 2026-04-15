@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
-import { Plus, Pencil, Globe, FileText, Trash2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { BlogListClient } from './BlogListClient'
 
 export default async function AdminBlogPage({
