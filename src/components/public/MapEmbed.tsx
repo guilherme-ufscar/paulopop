@@ -64,7 +64,7 @@ export function MapEmbed({ latitude, longitude, title }: MapEmbedProps) {
         })
         ro.observe(wrapperRef.current)
         // Guardar o observer para cleanup
-        ;(map as Record<string, unknown>).__ro = ro
+        ;(map as unknown as Record<string, unknown>).__ro = ro
       }
     })
 
