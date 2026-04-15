@@ -42,6 +42,9 @@ export function MapEmbed({ latitude, longitude, title }: MapEmbedProps) {
         .bindPopup(title ?? 'Imóvel')
 
       mapInstance.current = map
+
+      // Força o recalculo das dimensões após o mount para corrigir tiles cortados
+      setTimeout(() => { map.invalidateSize() }, 100)
     })
 
     return () => {
@@ -61,7 +64,7 @@ export function MapEmbed({ latitude, longitude, title }: MapEmbedProps) {
       />
       <div
         ref={mapRef}
-        className="w-full h-64 rounded-2xl overflow-hidden"
+        className="w-full h-72 md:h-80 rounded-2xl overflow-hidden"
         aria-label={`Mapa da localização: ${title ?? 'Imóvel'}`}
         role="img"
       />
