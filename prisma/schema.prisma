@@ -34,6 +34,7 @@ model User {
   properties    Property[]
   leads         Lead[]
   activities    Activity[]
+  blogPosts     BlogPost[]
 
   @@map("users")
 }
@@ -546,6 +547,33 @@ model SiteConfig {
   updatedAt         DateTime  @updatedAt
 
   @@map("site_config")
+}
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+
+model BlogPost {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  excerpt     String?        @db.Text
+  content     String         @db.Text
+  coverUrl    String?
+  category    String?
+  tags        String[]       @default([])
+  status      BlogPostStatus @default(DRAFT)
+  authorId    String
+  author      User           @relation(fields: [authorId], references: [id])
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, publishedAt])
+  @@map("blog_posts")
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
 }
 
 // ─── Depoimentos ─────────────────────────────────────────────────────────────

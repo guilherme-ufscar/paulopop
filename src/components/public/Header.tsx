@@ -10,6 +10,7 @@ const navLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/imoveis?transacao=comprar', label: 'Comprar' },
   { href: '/imoveis?transacao=alugar', label: 'Alugar' },
+  { href: '/blog', label: 'Blog' },
   { href: '/sobre', label: 'Sobre' },
   { href: '/contato', label: 'Contato' },
 ]
