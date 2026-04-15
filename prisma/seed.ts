@@ -303,7 +303,6 @@ async function upsertTestProperty(agentId: string) {
     latitude: -23.5613,
     longitude: -46.6558,
     keyNumber: 'APT-121',
-    title: '[TESTE] Apartamento completo para publicação',
     description: 'Apartamento de alto padrão localizado na Avenida Paulista, região nobre de São Paulo. Três suítes, dois banheiros sociais, sala ampla com varanda gourmet e cozinha planejada. Dois vagas de garagem cobertas. Condomínio completo com academia, piscina e salão de festas. Pronto para morar.',
     marketingDescription: 'Viva o melhor de São Paulo neste sofisticado apartamento na Avenida Paulista. Alto padrão, localização privilegiada e infraestrutura completa de lazer. Agende uma visita e surpreenda-se.',
     surroundingsInfo: 'A Avenida Paulista é o coração financeiro e cultural de São Paulo. A poucos metros do MASP, estação de metrô, restaurantes, hospitais e shoppings. Infraestrutura completa e fácil acesso a toda a cidade.',
