@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   User, Phone, Share2, Layout, Search, Mail, Puzzle,
-  Save, Eye, CheckCircle, AlertCircle, Upload, Loader2
+  Save, Eye, CheckCircle, AlertCircle, Upload, Loader2, ImageIcon
 } from 'lucide-react'
 
 const TABS = [
@@ -42,6 +42,7 @@ interface Config {
   metaTitle?: string
   metaDescription?: string
   ogImageUrl?: string
+  logoUrl?: string
   smtpHost?: string
   smtpPort?: string
   smtpUser?: string
@@ -62,6 +63,7 @@ export default function ConfiguracoesPage() {
   const photoRef = useRef<HTMLInputElement>(null)
   const heroBgRef = useRef<HTMLInputElement>(null)
   const ogRef = useRef<HTMLInputElement>(null)
+  const logoRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch('/api/admin/configuracoes')
@@ -285,6 +287,52 @@ export default function ConfiguracoesPage() {
           {activeTab === 'aparencia' && (
             <>
               <h2 className="font-semibold text-[#0D2F5E] text-lg">Aparência do Site</h2>
+
+              {/* Logo do site */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Logomarca do Site</label>
+                <p className="text-xs text-gray-400 mb-2">Exibida no cabeçalho do site (PNG transparente recomendado)</p>
+                <div className="flex items-center gap-4">
+                  {config.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={config.logoUrl} alt="Logo do site" className="h-14 max-w-[180px] object-contain border border-gray-200 rounded-xl p-1 bg-white" />
+                  ) : (
+                    <div className="w-20 h-14 rounded-xl bg-gray-100 flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => logoRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-xl text-sm hover:border-[#2E86DE] transition-colors"
+                    aria-label="Alterar logomarca do site"
+                  >
+                    <Upload className="w-4 h-4" /> Alterar logo
+                  </button>
+                  {config.logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => set('logoUrl', '')}
+                      className="text-xs text-red-500 hover:text-red-700"
+                      aria-label="Remover logomarca"
+                    >
+                      Remover
+                    </button>
+                  )}
+                  <input
+                    ref={logoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-hidden="true"
+                    onChange={async e => {
+                      const file = e.target.files?.[0]
+                      if (file) await uploadImage(file, 'logoUrl')
+                    }}
+                  />
+                </div>
+              </div>
+
               <Field label="Título do Hero" value={config.heroTitle} onChange={v => set('heroTitle', v)} />
               <Field label="Subtítulo do Hero" value={config.heroSubtitle} onChange={v => set('heroSubtitle', v)} />
               <Field label="Mensagem padrão WhatsApp" value={config.whatsappMessage} onChange={v => set('whatsappMessage', v)} />

@@ -44,6 +44,8 @@ export async function PUT(request: NextRequest) {
     heroTitle: safe(body.heroTitle, 200),
     heroSubtitle: safe(body.heroSubtitle, 300),
     heroBgUrl: safe(body.heroBgUrl, 500),
+    logoUrl: safe(body.logoUrl, 500),
+    ogImageUrl: safe(body.ogImageUrl, 500),
     whatsappMessage: safe(body.whatsappMessage, 500),
     metaTitle: safe(body.metaTitle, 200),
     metaDescription: safe(body.metaDescription, 500),

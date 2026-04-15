@@ -5,13 +5,15 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, Building2, Users, BarChart3,
-  Megaphone, FileText, Settings, X
+  Megaphone, FileText, Settings, X, UserCog, MessageSquareQuote
 } from 'lucide-react'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/imoveis', label: 'Imóveis', icon: Building2 },
   { href: '/admin/contatos', label: 'Leads & Contatos', icon: Users },
+  { href: '/admin/corretores', label: 'Corretores', icon: UserCog },
+  { href: '/admin/depoimentos', label: 'Depoimentos', icon: MessageSquareQuote },
   { href: '/admin/analise-mercado', label: 'Análise de Mercado', icon: BarChart3 },
   { href: '/admin/marketing', label: 'Marketing', icon: Megaphone },
   { href: '/admin/relatorios', label: 'Relatórios', icon: FileText },

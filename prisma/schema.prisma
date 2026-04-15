@@ -517,29 +517,50 @@ enum ActivityType {
 // ─── Configurações do Site ────────────────────────────────────────────────────
 
 model SiteConfig {
-  id              String    @id @default(cuid())
-  ownerName       String    @default("Paulo Pop")
-  ownerPhotoUrl   String?
-  ownerCreci      String?
-  ownerBio        String?   @db.Text
-  ownerWhatsapp   String?
-  ownerPhone      String?
-  ownerEmail      String?
-  ownerInstagram  String?
-  ownerFacebook   String?
-  ownerLinkedin   String?
-  ownerYoutube    String?
-  ownerTelegram   String?
-  ownerCompany    String?
-  ownerAddress    String?
-  metaTitle       String?
-  metaDescription String?
-  heroTitle       String?
-  heroSubtitle    String?
-  heroBgUrl       String?
-  footerText      String?
-  whatsappMessage String?
-  updatedAt       DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  ownerName         String    @default("Paulo Pop")
+  ownerPhotoUrl     String?
+  ownerCreci        String?
+  ownerBio          String?   @db.Text
+  ownerWhatsapp     String?
+  ownerPhone        String?
+  ownerEmail        String?
+  ownerInstagram    String?
+  ownerFacebook     String?
+  ownerLinkedin     String?
+  ownerYoutube      String?
+  ownerTelegram     String?
+  ownerCompany      String?
+  ownerCompanyCreci String?
+  ownerTwitter      String?
+  ownerAddress      String?
+  logoUrl           String?
+  ogImageUrl        String?
+  metaTitle         String?
+  metaDescription   String?
+  heroTitle         String?
+  heroSubtitle      String?
+  heroBgUrl         String?
+  footerText        String?
+  whatsappMessage   String?
+  updatedAt         DateTime  @updatedAt
 
   @@map("site_config")
+}
+
+// ─── Depoimentos ─────────────────────────────────────────────────────────────
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  text      String
+  rating    Int      @default(5)
+  avatarUrl String?
+  source    String?  @default("manual")
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
 }
