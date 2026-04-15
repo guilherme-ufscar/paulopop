@@ -55,6 +55,10 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
+  // Busca o usuário pelo email para garantir que o ID é válido no banco atual
+  const agent = await prisma.user.findUnique({ where: { email: session.user.email! }, select: { id: true } })
+  if (!agent) return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 401 })
+
   const body = await request.json()
   const { propertyType, purpose, transactionType, location } = body
 
@@ -71,7 +75,7 @@ export async function POST(request: NextRequest) {
       purpose: purpose ?? 'RESIDENTIAL',
       transactionType: transactionType ?? 'SALE',
       location: location ?? 'BRAZIL',
-      agentId: session.user.id,
+      agentId: agent.id,
       status: 'DRAFT',
     },
   })
