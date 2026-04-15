@@ -36,6 +36,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const body = await request.json()
+
+  // Extrair imagens e vídeos antes de normalizar (são tratados separadamente)
+  const rawImages: Array<Record<string, unknown>> = Array.isArray(body.images) ? body.images : []
+  const rawVideos: Array<Record<string, unknown>> = Array.isArray(body.videos) ? body.videos : []
+
   const data = normalizePropertyUpdateInput(body)
 
   try {
@@ -46,6 +51,65 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         updatedAt: new Date(),
       },
     })
+
+    // Sincronizar imagens
+    if (rawImages.length > 0 || body.images !== undefined) {
+      // IDs das imagens que ainda existem no frontend
+      const existingIds = rawImages.filter(img => img.id).map(img => img.id as string)
+
+      // Deletar imagens removidas
+      await prisma.propertyImage.deleteMany({
+        where: { propertyId: params.id, id: { notIn: existingIds } },
+      })
+
+      // Criar novas imagens e atualizar as existentes
+      for (let i = 0; i < rawImages.length; i++) {
+        const img = rawImages[i]
+        if (img.id) {
+          // Atualizar flags e ordem de imagens existentes
+          await prisma.propertyImage.update({
+            where: { id: img.id as string },
+            data: {
+              isCover: Boolean(img.isCover),
+              is360: Boolean(img.is360),
+              isPanoramic: Boolean(img.isPanoramic),
+              order: i,
+              alt: (img.alt as string) ?? null,
+            },
+          })
+        } else if (img.url) {
+          // Criar nova imagem
+          await prisma.propertyImage.create({
+            data: {
+              propertyId: params.id,
+              url: img.url as string,
+              thumbnailUrl: (img.thumbnailUrl as string) ?? null,
+              isCover: Boolean(img.isCover),
+              is360: Boolean(img.is360),
+              isPanoramic: Boolean(img.isPanoramic),
+              order: i,
+            },
+          })
+        }
+      }
+
+      // Se não havia imagens no payload, deletar todas
+      if (rawImages.length === 0 && body.images !== undefined) {
+        await prisma.propertyImage.deleteMany({ where: { propertyId: params.id } })
+      }
+    }
+
+    // Sincronizar vídeos
+    if (body.videos !== undefined) {
+      await prisma.propertyVideo.deleteMany({ where: { propertyId: params.id } })
+      for (const vid of rawVideos) {
+        if (vid.youtubeUrl) {
+          await prisma.propertyVideo.create({
+            data: { propertyId: params.id, youtubeUrl: vid.youtubeUrl as string },
+          })
+        }
+      }
+    }
 
     return NextResponse.json(property)
   } catch (error) {

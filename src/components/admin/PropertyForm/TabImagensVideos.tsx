@@ -169,6 +169,7 @@ export function TabImagensVideos({
                   fill
                   sizes="200px"
                   className="object-cover"
+                  unoptimized
                 />
                 {img.isCover && (
                   <div className="absolute top-1 left-1 bg-[#2E86DE] text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
