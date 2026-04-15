@@ -37,9 +37,21 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   const body = await request.json()
 
-  // Extrair imagens e vídeos antes de normalizar (são tratados separadamente)
+  // Extrair relações antes de normalizar (tratadas separadamente)
   const rawImages: Array<Record<string, unknown>> = Array.isArray(body.images) ? body.images : []
   const rawVideos: Array<Record<string, unknown>> = Array.isArray(body.videos) ? body.videos : []
+  // Features: aceitar tanto string[] quanto objetos {feature: string}
+  const rawFeatures: string[] = Array.isArray(body.features)
+    ? (body.features as Array<unknown>).map(f =>
+        typeof f === 'string' ? f : (f as Record<string, unknown>)?.feature as string
+      ).filter(Boolean)
+    : []
+  // Lifestyles: aceitar tanto string[] quanto objetos {lifestyle: string}
+  const rawLifestyles: string[] = Array.isArray(body.lifestyles)
+    ? (body.lifestyles as Array<unknown>).map(l =>
+        typeof l === 'string' ? l : (l as Record<string, unknown>)?.lifestyle as string
+      ).filter(Boolean)
+    : []
 
   const data = normalizePropertyUpdateInput(body)
 
@@ -108,6 +120,26 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             data: { propertyId: params.id, youtubeUrl: vid.youtubeUrl as string },
           })
         }
+      }
+    }
+
+    // Sincronizar features (características)
+    if (body.features !== undefined) {
+      await prisma.propertyFeature.deleteMany({ where: { propertyId: params.id } })
+      for (const feature of rawFeatures) {
+        await prisma.propertyFeature.create({
+          data: { propertyId: params.id, feature: feature as never },
+        })
+      }
+    }
+
+    // Sincronizar lifestyles (estilos de vida)
+    if (body.lifestyles !== undefined) {
+      await prisma.propertyLifestyle.deleteMany({ where: { propertyId: params.id } })
+      for (const lifestyle of rawLifestyles) {
+        await prisma.propertyLifestyle.create({
+          data: { propertyId: params.id, lifestyle: lifestyle as never },
+        })
       }
     }
 

@@ -2,14 +2,19 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
-const UPLOAD_BASE = process.env.UPLOAD_DIR ?? './public/uploads'
+// Em dev: './public/uploads' (relativo à raiz do projeto)
+// Em Docker: '/app/public/uploads' (definido em docker-compose.yml)
+// ATENÇÃO: não configure UPLOAD_DIR como caminho absoluto fora de public/ ao rodar localmente
+const UPLOAD_BASE = process.env.UPLOAD_DIR ?? path.join(process.cwd(), 'public', 'uploads')
 
 export async function saveImage(file: File): Promise<{ url: string; thumbnailUrl: string }> {
   const sharp = (await import('sharp')).default
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
 
-  const dir = path.resolve(UPLOAD_BASE, 'images')
+  const dir = path.isAbsolute(UPLOAD_BASE)
+    ? path.join(UPLOAD_BASE, 'images')
+    : path.join(process.cwd(), UPLOAD_BASE, 'images')
   await fs.mkdir(dir, { recursive: true })
 
   const ext = 'webp'
@@ -38,7 +43,9 @@ export async function saveDocument(file: File): Promise<{ url: string; size: num
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
 
-  const dir = path.resolve(UPLOAD_BASE, 'documents')
+  const dir = path.isAbsolute(UPLOAD_BASE)
+    ? path.join(UPLOAD_BASE, 'documents')
+    : path.join(process.cwd(), UPLOAD_BASE, 'documents')
   await fs.mkdir(dir, { recursive: true })
 
   const originalExt = file.name.split('.').pop() ?? 'bin'

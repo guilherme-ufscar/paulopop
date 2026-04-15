@@ -85,7 +85,7 @@ function parseNullableDecimal(value: unknown): number | null | unknown {
   if (!normalized) return null
 
   const parsed = Number.parseFloat(normalized)
-  return Number.isNaN(parsed) ? value : parsed
+  return Number.isNaN(parsed) ? null : parsed
 }
 
 export function normalizePropertyUpdateInput(body: Record<string, unknown>) {
