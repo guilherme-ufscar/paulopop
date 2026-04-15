@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { sanitizeHtml } from '@/lib/sanitize'
+import { normalizePropertyUpdateInput } from '@/lib/property-update'
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const property = await prisma.property.findUnique({
@@ -36,68 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const body = await request.json()
-
-  // Remover campos que são relações (gerenciados separadamente)
-  const { images: _images, videos: _videos, documents: _documents, features: _features, lifestyles: _lifestyles, parkingSpots: _parkingSpots, rooms: _rooms, additionalFees: _additionalFees, portals: _portals, leads: _leads, activities: _activities, agent: _agent, condominium: _condominium, owner: _owner, ...data } = body
-
-  // Sanitizar campos HTML antes de salvar (5.4)
-  if (data.description) data.description = sanitizeHtml(data.description)
-  if (data.marketingDescription) data.marketingDescription = sanitizeHtml(data.marketingDescription)
-  if (data.surroundingsInfo) data.surroundingsInfo = sanitizeHtml(data.surroundingsInfo)
-  if (data.descriptionEn) data.descriptionEn = sanitizeHtml(data.descriptionEn)
-
-  // Converte valor de data para ISO-8601 DateTime completo, ou null se inválido
-  function parseDate(value: unknown): string | null {
-    if (value === '' || value === null || value === undefined) return null
-    if (typeof value !== 'string') return null
-    // Formato date-only YYYY-MM-DD → converte para datetime UTC
-    if (/^\d{1,4}-\d{2}-\d{2}$/.test(value)) {
-      const parsed = new Date(`${value}T00:00:00.000Z`)
-      return isNaN(parsed.getTime()) ? null : parsed.toISOString()
-    }
-    const parsed = new Date(value)
-    return isNaN(parsed.getTime()) ? null : value
-  }
-
-  // DateTime nullable: string vazia, formato parcial ou inválido vira null
-  const nullableDateFields = ['expiryDate', 'availabilityDate', 'publishedAt']
-  for (const field of nullableDateFields) {
-    data[field] = parseDate(data[field])
-  }
-
-  // DateTime não-nullable (registrationDate): remove do update se vazio/inválido
-  if ('registrationDate' in data) {
-    const parsed = parseDate(data.registrationDate)
-    if (parsed) data.registrationDate = parsed
-    else delete data.registrationDate
-  }
-
-  // Campos numéricos (Int e Decimal): string vazia vira null
-  const nullableNumericFields = [
-    'constructionYear', 'floors', 'unitsInBuilding', 'maxOccupancy',
-    'totalParkingSpots', 'buildingFloors', 'environments', 'bedrooms',
-    'bathrooms', 'suites', 'price', 'pricePerSqm', 'iptu', 'condominiumFee',
-    'captureCommissionPct', 'captureCommissionAmt', 'saleCommissionPct',
-    'saleCommissionAmt', 'totalArea', 'usefulArea', 'landArea', 'cubicVolume',
-    'landDimensionWidth', 'landDimensionLength', 'latitude', 'longitude',
-  ]
-  for (const field of nullableNumericFields) {
-    if (data[field] === '') data[field] = null
-  }
-
-  // Ao ativar um imóvel, definir publishedAt automaticamente se ainda não tiver
-  if (data.status === 'ACTIVE' && !data.publishedAt) {
-    data.publishedAt = new Date().toISOString()
-  }
-
-  // Campos gerenciados automaticamente ou imutáveis: nunca sobrescrever do body
-  delete data.createdAt
-  delete data.updatedAt
-  delete data.id
-  delete data.ref
-  delete data.slug
-  delete data.views
-  delete data.favorites
+  const data = normalizePropertyUpdateInput(body)
 
   try {
     const property = await prisma.property.update({
