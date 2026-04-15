@@ -535,7 +535,7 @@ function AgentBar({ name, company, avatarUrl, phone, whatsapp, propertySlug }: {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
