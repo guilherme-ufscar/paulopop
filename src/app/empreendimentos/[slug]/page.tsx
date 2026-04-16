@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import {
   MapPin, BedDouble, Maximize2, Building2, Calendar,
