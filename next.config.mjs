@@ -38,7 +38,7 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
               "connect-src 'self' https:",
-              "frame-src 'self' https://www.youtube.com https://*.youtube.com https://*.google.com",
+              "frame-src 'self' https://www.youtube.com https://*.youtube.com https://*.google.com https://www.openstreetmap.org https://openstreetmap.org",
               "media-src 'self' https:",
             ].join('; '),
           },
