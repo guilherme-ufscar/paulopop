@@ -1,7 +1,3 @@
-'use client'
-
-import { useEffect, useRef } from 'react'
-
 interface MapEmbedProps {
   latitude: number
   longitude: number
@@ -9,100 +5,21 @@ interface MapEmbedProps {
 }
 
 export function MapEmbed({ latitude, longitude, title }: MapEmbedProps) {
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<HTMLDivElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapInstance = useRef<any>(null)
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !mapRef.current || mapInstance.current) return
-
-    import('leaflet').then(L => {
-      if (!mapRef.current || mapInstance.current) return
-
-      // Corrigir ícone padrão do Leaflet no Next.js
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      })
-
-      const map = L.map(mapRef.current, {
-        center: [latitude, longitude],
-        zoom: 15,
-        scrollWheelZoom: false,
-        // Desabilita animações de fade para evitar problema de tiles fantasmas
-        fadeAnimation: false,
-        zoomAnimation: false,
-      })
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map)
-
-      L.marker([latitude, longitude])
-        .addTo(map)
-        .bindPopup(title ?? 'Imóvel', { autoPan: false })
-        .openPopup()
-
-      mapInstance.current = map
-
-      const fixMap = () => {
-        map.invalidateSize({ animate: false, pan: false })
-        map.setView([latitude, longitude], 15, { animate: false })
-      }
-
-      // Chamar invalidateSize + setView várias vezes garante que o Leaflet
-      // recalcula e re-centraliza corretamente independente do timing do hydration
-      setTimeout(fixMap, 0)
-      setTimeout(fixMap, 200)
-      setTimeout(fixMap, 600)
-      setTimeout(fixMap, 1200)
-
-      // ResizeObserver para recalcular quando o container muda de tamanho
-      // (ex: sidebar fecha, janela é redimensionada)
-      if (typeof ResizeObserver !== 'undefined' && wrapperRef.current) {
-        const ro = new ResizeObserver(() => {
-          map.invalidateSize({ animate: false, pan: false })
-          map.setView([latitude, longitude], 15, { animate: false })
-        })
-        ro.observe(wrapperRef.current)
-        // Guardar o observer para cleanup
-        ;(map as unknown as Record<string, unknown>).__ro = ro
-      }
-    })
-
-    return () => {
-      if (mapInstance.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ro = (mapInstance.current as any).__ro as ResizeObserver | undefined
-        if (ro) ro.disconnect()
-        mapInstance.current.remove()
-        mapInstance.current = null
-      }
-    }
-  }, [latitude, longitude, title])
+  const delta = 0.008
+  const bbox = `${longitude - delta},${latitude - delta},${longitude + delta},${latitude + delta}`
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latitude},${longitude}`
 
   return (
-    <>
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        crossOrigin="anonymous"
+    <div style={{ width: '100%', height: '320px', borderRadius: '1rem', overflow: 'hidden' }}>
+      <iframe
+        title={`Mapa da localização: ${title ?? 'Imóvel'}`}
+        src={src}
+        width="100%"
+        height="100%"
+        style={{ border: 0, display: 'block' }}
+        loading="lazy"
+        referrerPolicy="no-referrer"
       />
-      {/* Wrapper com altura explícita via style para garantir que o Leaflet
-          veja as dimensões corretas independente do Tailwind ser aplicado */}
-      <div ref={wrapperRef} style={{ width: '100%', height: '320px', borderRadius: '1rem', overflow: 'hidden' }}>
-        <div
-          ref={mapRef}
-          style={{ width: '100%', height: '100%' }}
-          aria-label={`Mapa da localização: ${title ?? 'Imóvel'}`}
-          role="img"
-        />
-      </div>
-    </>
+    </div>
   )
 }

@@ -509,9 +509,7 @@ import nextDynamic from 'next/dynamic'
 
 const DescriptionExpanderClient = nextDynamic(() => import('@/components/public/DescriptionExpander'), { ssr: false })
 
-const MapEmbedWrapper = nextDynamic(() =>
-  import('@/components/public/MapEmbed').then(m => m.MapEmbed), { ssr: false }
-)
+import { MapEmbed as MapEmbedWrapper } from '@/components/public/MapEmbed'
 
 // Barra inferior do agente
 function AgentBar({ name, company, avatarUrl, phone, whatsapp, propertySlug }: {
