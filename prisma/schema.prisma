@@ -544,6 +544,13 @@ model SiteConfig {
   heroBgUrl         String?
   footerText        String?
   whatsappMessage   String?
+  // Visibilidade das seções da home
+  showDestaques     Boolean   @default(true)
+  showCompra        Boolean   @default(true)
+  showLocacao       Boolean   @default(true)
+  showApartamentos  Boolean   @default(true)
+  showCasas         Boolean   @default(true)
+  showTerrenos      Boolean   @default(true)
   updatedAt         DateTime  @updatedAt
 
   @@map("site_config")
@@ -574,6 +581,76 @@ model BlogPost {
 enum BlogPostStatus {
   DRAFT
   PUBLISHED
+}
+
+// ─── Empreendimentos ──────────────────────────────────────────────────────────
+
+model Empreendimento {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  tagline         String?
+  description     String?  @db.Text
+  status          String   @default("DRAFT") // DRAFT | PUBLISHED
+  // Localização
+  address         String?
+  neighborhood    String?
+  city            String?
+  state           String?
+  latitude        Float?
+  longitude       Float?
+  // Detalhes técnicos
+  architect       String?
+  deliveryDate    String?
+  totalUnits      Int?
+  floors          Int?
+  bedroomsMin     Int?
+  bedroomsMax     Int?
+  areaMin         Float?
+  areaMax         Float?
+  priceMin        Decimal? @db.Decimal(15,2)
+  priceMax        Decimal? @db.Decimal(15,2)
+  // Financiamento
+  financing       String?  // ex: "MCMV", "FGTS", "Direto"
+  // Mídia
+  coverUrl        String?
+  logoUrl         String?
+  images          EmpreendimentoImage[]
+  floorPlanImages EmpreendimentoFloorPlan[]
+  // Diferenciais / amenidades (JSON array de strings)
+  amenities       String?  @db.Text
+  highlights      String?  @db.Text
+  // CTA
+  ctaLabel        String?
+  ctaWhatsapp     String?
+  ctaUrl          String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("empreendimentos")
+}
+
+model EmpreendimentoImage {
+  id                String          @id @default(cuid())
+  empreendimentoId  String
+  url               String
+  caption           String?
+  order             Int             @default(0)
+  empreendimento    Empreendimento  @relation(fields: [empreendimentoId], references: [id], onDelete: Cascade)
+
+  @@map("empreendimento_images")
+}
+
+model EmpreendimentoFloorPlan {
+  id                String          @id @default(cuid())
+  empreendimentoId  String
+  url               String
+  caption           String?
+  order             Int             @default(0)
+  empreendimento    Empreendimento  @relation(fields: [empreendimentoId], references: [id], onDelete: Cascade)
+
+  @@map("empreendimento_floor_plans")
 }
 
 // ─── Depoimentos ─────────────────────────────────────────────────────────────

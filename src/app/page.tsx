@@ -303,71 +303,83 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <PropertySection
-        eyebrow="Destaques"
-        title="Imoveis em destaque na home"
-        description="Uma selecao inicial para quem quer visualizar oportunidades logo de cara."
-        href="/imoveis"
-        ctaLabel="Ver todos os imoveis"
-        properties={properties.slice(0, 10)}
-        backgroundClassName="bg-[#f6f7fb]"
-        sectionId="imoveis-destaque-title"
-      />
+      {(config?.showDestaques ?? true) && properties.length > 0 && (
+        <PropertySection
+          eyebrow="Destaques"
+          title="Imoveis em destaque na home"
+          description="Uma selecao inicial para quem quer visualizar oportunidades logo de cara."
+          href="/imoveis"
+          ctaLabel="Ver todos os imoveis"
+          properties={properties.slice(0, 10)}
+          backgroundClassName="bg-[#f6f7fb]"
+          sectionId="imoveis-destaque-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Compra"
-        title="Imoveis para quem esta buscando comprar"
-        description="Oportunidades organizadas para quem quer sair da busca generica e comparar melhor."
-        href="/imoveis?transacao=comprar"
-        ctaLabel="Ver opcoes de compra"
-        properties={saleProperties}
-        backgroundClassName="bg-white"
-        sectionId="comprar-title"
-      />
+      {(config?.showCompra ?? true) && saleProperties.length > 0 && (
+        <PropertySection
+          eyebrow="Compra"
+          title="Imoveis para quem esta buscando comprar"
+          description="Oportunidades organizadas para quem quer sair da busca generica e comparar melhor."
+          href="/imoveis?transacao=comprar"
+          ctaLabel="Ver opcoes de compra"
+          properties={saleProperties}
+          backgroundClassName="bg-white"
+          sectionId="comprar-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Locacao"
-        title="Oportunidades para alugar com mais rapidez"
-        description="Uma secao focada em quem quer praticidade sem abrir mao de comparacao e contexto."
-        href="/imoveis?transacao=alugar"
-        ctaLabel="Ver opcoes para alugar"
-        properties={rentProperties}
-        backgroundClassName="bg-[#f8fafc]"
-        sectionId="alugar-title"
-      />
+      {(config?.showLocacao ?? true) && rentProperties.length > 0 && (
+        <PropertySection
+          eyebrow="Locacao"
+          title="Oportunidades para alugar com mais rapidez"
+          description="Uma secao focada em quem quer praticidade sem abrir mao de comparacao e contexto."
+          href="/imoveis?transacao=alugar"
+          ctaLabel="Ver opcoes para alugar"
+          properties={rentProperties}
+          backgroundClassName="bg-[#f8fafc]"
+          sectionId="alugar-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Categoria"
-        title="Apartamentos em destaque"
-        description="Uma selecao para quem quer praticidade urbana, moradia ou investimento."
-        href="/imoveis?tipo=Apartamento"
-        ctaLabel="Ver apartamentos"
-        properties={apartments}
-        backgroundClassName="bg-white"
-        sectionId="apartamentos-title"
-      />
+      {(config?.showApartamentos ?? true) && apartments.length > 0 && (
+        <PropertySection
+          eyebrow="Categoria"
+          title="Apartamentos em destaque"
+          description="Uma selecao para quem quer praticidade urbana, moradia ou investimento."
+          href="/imoveis?tipo=Apartamento"
+          ctaLabel="Ver apartamentos"
+          properties={apartments}
+          backgroundClassName="bg-white"
+          sectionId="apartamentos-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Categoria"
-        title="Casas e sobrados"
-        description="Imoveis para quem busca mais espaco, conforto e flexibilidade no dia a dia."
-        href="/imoveis?tipo=Casa"
-        ctaLabel="Ver casas"
-        properties={houses}
-        backgroundClassName="bg-[#f8fafc]"
-        sectionId="casas-title"
-      />
+      {(config?.showCasas ?? true) && houses.length > 0 && (
+        <PropertySection
+          eyebrow="Categoria"
+          title="Casas e sobrados"
+          description="Imoveis para quem busca mais espaco, conforto e flexibilidade no dia a dia."
+          href="/imoveis?tipo=Casa"
+          ctaLabel="Ver casas"
+          properties={houses}
+          backgroundClassName="bg-[#f8fafc]"
+          sectionId="casas-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Categoria"
-        title="Terrenos e areas"
-        description="Oportunidades para construir, expandir ou investir com visao de longo prazo."
-        href="/imoveis?tipo=Terreno"
-        ctaLabel="Ver terrenos"
-        properties={lands}
-        backgroundClassName="bg-white"
-        sectionId="terrenos-title"
-      />
+      {(config?.showTerrenos ?? true) && lands.length > 0 && (
+        <PropertySection
+          eyebrow="Categoria"
+          title="Terrenos e areas"
+          description="Oportunidades para construir, expandir ou investir com visao de longo prazo."
+          href="/imoveis?tipo=Terreno"
+          ctaLabel="Ver terrenos"
+          properties={lands}
+          backgroundClassName="bg-white"
+          sectionId="terrenos-title"
+        />
+      )}
 
       <section className="bg-[#f6f7fb] py-20" aria-labelledby="processo-title">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">

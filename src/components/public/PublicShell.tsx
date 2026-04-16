@@ -11,6 +11,7 @@ interface PublicShellProps {
   ownerCompany?: string
   whatsapp?: string
   whatsappMessage?: string
+  cities?: string[]
 }
 
 export function PublicShell({
@@ -19,6 +20,7 @@ export function PublicShell({
   ownerCompany,
   whatsapp,
   whatsappMessage,
+  cities,
 }: PublicShellProps) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
@@ -29,7 +31,7 @@ export function PublicShell({
     <>
       <Header />
       <main id="main-content">{children}</main>
-      <Footer ownerName={ownerName} ownerCompany={ownerCompany ?? undefined} />
+      <Footer ownerName={ownerName} ownerCompany={ownerCompany ?? undefined} cities={cities} />
       {whatsapp && (
         <WhatsAppButton phone={whatsapp} message={whatsappMessage} />
       )}

@@ -18,7 +18,7 @@ export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const body = await request.json() as Record<string, string>
+  const body = await request.json() as Record<string, string | boolean>
 
   // Sanitizar e limitar todos os campos de texto
   const safe = (v: unknown, max = 500) =>
@@ -50,6 +50,12 @@ export async function PUT(request: NextRequest) {
     metaTitle: safe(body.metaTitle, 200),
     metaDescription: safe(body.metaDescription, 500),
     footerText: safe(body.footerText, 500),
+    showDestaques:   typeof body.showDestaques   === 'boolean' ? body.showDestaques   : undefined,
+    showCompra:      typeof body.showCompra      === 'boolean' ? body.showCompra      : undefined,
+    showLocacao:     typeof body.showLocacao     === 'boolean' ? body.showLocacao     : undefined,
+    showApartamentos:typeof body.showApartamentos=== 'boolean' ? body.showApartamentos: undefined,
+    showCasas:       typeof body.showCasas       === 'boolean' ? body.showCasas       : undefined,
+    showTerrenos:    typeof body.showTerrenos    === 'boolean' ? body.showTerrenos    : undefined,
   }
 
   // Remover campos undefined para não sobrescrever com null

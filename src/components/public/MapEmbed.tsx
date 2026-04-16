@@ -45,22 +45,29 @@ export function MapEmbed({ latitude, longitude, title }: MapEmbedProps) {
 
       L.marker([latitude, longitude])
         .addTo(map)
-        .bindPopup(title ?? 'Imóvel')
+        .bindPopup(title ?? 'Imóvel', { autoPan: false })
         .openPopup()
 
       mapInstance.current = map
 
-      // Chamar invalidateSize várias vezes garante que o Leaflet
-      // recalcula corretamente independente do timing do hydration
-      setTimeout(() => map.invalidateSize(), 0)
-      setTimeout(() => map.invalidateSize(), 200)
-      setTimeout(() => map.invalidateSize(), 600)
+      const fixMap = () => {
+        map.invalidateSize({ animate: false, pan: false })
+        map.setView([latitude, longitude], 15, { animate: false })
+      }
+
+      // Chamar invalidateSize + setView várias vezes garante que o Leaflet
+      // recalcula e re-centraliza corretamente independente do timing do hydration
+      setTimeout(fixMap, 0)
+      setTimeout(fixMap, 200)
+      setTimeout(fixMap, 600)
+      setTimeout(fixMap, 1200)
 
       // ResizeObserver para recalcular quando o container muda de tamanho
       // (ex: sidebar fecha, janela é redimensionada)
       if (typeof ResizeObserver !== 'undefined' && wrapperRef.current) {
         const ro = new ResizeObserver(() => {
-          map.invalidateSize()
+          map.invalidateSize({ animate: false, pan: false })
+          map.setView([latitude, longitude], 15, { animate: false })
         })
         ro.observe(wrapperRef.current)
         // Guardar o observer para cleanup

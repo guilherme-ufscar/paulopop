@@ -35,14 +35,20 @@ function markdownToHtml(md: string): string {
     .replace(/\n{3,}/g, '\n\n')
 }
 
-export function BlogContent({ content }: Props) {
-  const html = markdownToHtml(content)
+// Posts novos são salvos como HTML (TipTap). Posts antigos como Markdown.
+// Detecta pelo primeiro caractere: HTML começa com '<'.
+function renderContent(content: string): string {
+  return content.trimStart().startsWith('<')
+    ? content
+    : markdownToHtml(content)
+}
 
+export function BlogContent({ content }: Props) {
   return (
     <div
       className="prose-custom max-w-none"
       // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: renderContent(content) }}
     />
   )
 }

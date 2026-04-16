@@ -6,6 +6,12 @@ import {
   Save, Globe, FileText, Upload, X, Loader2, Tag,
   CheckCircle, AlertCircle, Image as ImageIcon, ArrowLeft
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+const RichTextEditor = dynamic(
+  () => import('./RichTextEditor').then(m => m.RichTextEditor),
+  { ssr: false, loading: () => <div className="h-64 border border-gray-300 rounded-xl bg-gray-50 animate-pulse" /> }
+)
 import Link from 'next/link'
 
 interface BlogPostData {
@@ -197,39 +203,24 @@ export function BlogPostEditor({ initial }: { initial?: Partial<BlogPostData> & 
               id="blog-excerpt"
               value={form.excerpt}
               onChange={e => set('excerpt', e.target.value)}
-              rows={3}
-              maxLength={300}
-              placeholder="Breve resumo do post (máx. 300 caracteres)..."
-              className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E86DE] resize-none"
+              rows={5}
+              maxLength={3000}
+              placeholder="Resumo do post (máx. 3000 caracteres)..."
+              className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E86DE] resize-y"
               aria-label="Resumo do post"
             />
-            <p className="text-xs text-gray-400 mt-1">{form.excerpt.length}/300</p>
+            <p className="text-xs text-gray-400 mt-1">{form.excerpt.length}/3000</p>
           </div>
 
           {/* Conteúdo */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <label htmlFor="blog-content" className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Conteúdo *
-              <span className="ml-1 text-xs text-gray-400">(suporta formatação Markdown)</span>
             </label>
-            <div className="mb-2 flex flex-wrap gap-1 text-xs text-gray-400">
-              <span className="bg-gray-100 px-2 py-0.5 rounded font-mono">**negrito**</span>
-              <span className="bg-gray-100 px-2 py-0.5 rounded font-mono">*itálico*</span>
-              <span className="bg-gray-100 px-2 py-0.5 rounded font-mono"># Título</span>
-              <span className="bg-gray-100 px-2 py-0.5 rounded font-mono">## Subtítulo</span>
-              <span className="bg-gray-100 px-2 py-0.5 rounded font-mono">- item</span>
-              <span className="bg-gray-100 px-2 py-0.5 rounded font-mono">[link](url)</span>
-            </div>
-            <textarea
-              id="blog-content"
+            <RichTextEditor
               value={form.content}
-              onChange={e => set('content', e.target.value)}
-              rows={20}
-              placeholder="Escreva o conteúdo do post em Markdown..."
-              className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#2E86DE] resize-y"
-              aria-required="true"
+              onChange={html => set('content', html)}
             />
-            <p className="text-xs text-gray-400 mt-1">{form.content.length} caracteres</p>
           </div>
         </div>
 
