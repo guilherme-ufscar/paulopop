@@ -46,6 +46,7 @@ export function TabImagensVideos({
 }: TabImagensVideosProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const youtubeUrl = videos[0]?.youtubeUrl ?? ''
 
@@ -55,16 +56,21 @@ export function TabImagensVideos({
     formData.append('type', 'image')
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
-      if (!res.ok) return null
       const data = await res.json()
+      if (!res.ok) {
+        setUploadError(data.error ?? 'Falha ao enviar arquivo')
+        return null
+      }
       return { url: data.url, thumbnailUrl: data.thumbnailUrl, isCover: images.length === 0, _new: true }
-    } catch {
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Erro de conexão')
       return null
     }
   }
 
   const handleFiles = async (files: FileList) => {
     setUploading(true)
+    setUploadError(null)
     const newImages: PropertyImage[] = []
     for (const file of Array.from(files)) {
       const img = await uploadFile(file)
@@ -147,6 +153,7 @@ export function TabImagensVideos({
           <p className="text-sm font-medium text-[#2E86DE] mt-1">clique para selecionar arquivos</p>
           <p className="text-xs text-gray-400 mt-2">JPEG, PNG, WEBP — máx. 10MB por arquivo</p>
           {uploading && <p className="text-sm text-[#2E86DE] mt-2">Enviando...</p>}
+          {uploadError && <p className="text-sm text-red-600 mt-2">Erro: {uploadError}</p>}
         </div>
         <input
           ref={fileInputRef}

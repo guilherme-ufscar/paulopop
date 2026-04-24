@@ -12,6 +12,7 @@ import {
   Phone,
   Send,
   ShieldCheck,
+  Calendar,
 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { SearchBar } from '@/components/public/SearchBar'
@@ -112,7 +113,7 @@ function PropertySection({
 }
 
 export default async function HomePage() {
-  const [config, recentProperties] = await Promise.all([
+  const [config, recentProperties, blogPosts] = await Promise.all([
     prisma.siteConfig.findFirst(),
     prisma.property.findMany({
       where: { status: 'ACTIVE', hideOnSite: false },
@@ -141,6 +142,15 @@ export default async function HomePage() {
           take: 1,
           select: { url: true, thumbnailUrl: true },
         },
+      },
+    }),
+    prisma.blogPost.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { publishedAt: 'desc' },
+      take: 3,
+      select: {
+        slug: true, title: true, excerpt: true, coverUrl: true,
+        category: true, publishedAt: true,
       },
     }),
   ])
@@ -293,71 +303,83 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <PropertySection
-        eyebrow="Destaques"
-        title="Imoveis em destaque na home"
-        description="Uma selecao inicial para quem quer visualizar oportunidades logo de cara."
-        href="/imoveis"
-        ctaLabel="Ver todos os imoveis"
-        properties={properties.slice(0, 10)}
-        backgroundClassName="bg-[#f6f7fb]"
-        sectionId="imoveis-destaque-title"
-      />
+      {(config?.showDestaques ?? true) && properties.length > 0 && (
+        <PropertySection
+          eyebrow="Destaques"
+          title="Imoveis em destaque na home"
+          description="Uma selecao inicial para quem quer visualizar oportunidades logo de cara."
+          href="/imoveis"
+          ctaLabel="Ver todos os imoveis"
+          properties={properties.slice(0, 10)}
+          backgroundClassName="bg-[#f6f7fb]"
+          sectionId="imoveis-destaque-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Compra"
-        title="Imoveis para quem esta buscando comprar"
-        description="Oportunidades organizadas para quem quer sair da busca generica e comparar melhor."
-        href="/imoveis?transacao=comprar"
-        ctaLabel="Ver opcoes de compra"
-        properties={saleProperties}
-        backgroundClassName="bg-white"
-        sectionId="comprar-title"
-      />
+      {(config?.showCompra ?? true) && saleProperties.length > 0 && (
+        <PropertySection
+          eyebrow="Compra"
+          title="Imoveis para quem esta buscando comprar"
+          description="Oportunidades organizadas para quem quer sair da busca generica e comparar melhor."
+          href="/imoveis?transacao=comprar"
+          ctaLabel="Ver opcoes de compra"
+          properties={saleProperties}
+          backgroundClassName="bg-white"
+          sectionId="comprar-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Locacao"
-        title="Oportunidades para alugar com mais rapidez"
-        description="Uma secao focada em quem quer praticidade sem abrir mao de comparacao e contexto."
-        href="/imoveis?transacao=alugar"
-        ctaLabel="Ver opcoes para alugar"
-        properties={rentProperties}
-        backgroundClassName="bg-[#f8fafc]"
-        sectionId="alugar-title"
-      />
+      {(config?.showLocacao ?? true) && rentProperties.length > 0 && (
+        <PropertySection
+          eyebrow="Locacao"
+          title="Oportunidades para alugar com mais rapidez"
+          description="Uma secao focada em quem quer praticidade sem abrir mao de comparacao e contexto."
+          href="/imoveis?transacao=alugar"
+          ctaLabel="Ver opcoes para alugar"
+          properties={rentProperties}
+          backgroundClassName="bg-[#f8fafc]"
+          sectionId="alugar-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Categoria"
-        title="Apartamentos em destaque"
-        description="Uma selecao para quem quer praticidade urbana, moradia ou investimento."
-        href="/imoveis?tipo=Apartamento"
-        ctaLabel="Ver apartamentos"
-        properties={apartments}
-        backgroundClassName="bg-white"
-        sectionId="apartamentos-title"
-      />
+      {(config?.showApartamentos ?? true) && apartments.length > 0 && (
+        <PropertySection
+          eyebrow="Categoria"
+          title="Apartamentos em destaque"
+          description="Uma selecao para quem quer praticidade urbana, moradia ou investimento."
+          href="/imoveis?tipo=Apartamento"
+          ctaLabel="Ver apartamentos"
+          properties={apartments}
+          backgroundClassName="bg-white"
+          sectionId="apartamentos-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Categoria"
-        title="Casas e sobrados"
-        description="Imoveis para quem busca mais espaco, conforto e flexibilidade no dia a dia."
-        href="/imoveis?tipo=Casa"
-        ctaLabel="Ver casas"
-        properties={houses}
-        backgroundClassName="bg-[#f8fafc]"
-        sectionId="casas-title"
-      />
+      {(config?.showCasas ?? true) && houses.length > 0 && (
+        <PropertySection
+          eyebrow="Categoria"
+          title="Casas e sobrados"
+          description="Imoveis para quem busca mais espaco, conforto e flexibilidade no dia a dia."
+          href="/imoveis?tipo=Casa"
+          ctaLabel="Ver casas"
+          properties={houses}
+          backgroundClassName="bg-[#f8fafc]"
+          sectionId="casas-title"
+        />
+      )}
 
-      <PropertySection
-        eyebrow="Categoria"
-        title="Terrenos e areas"
-        description="Oportunidades para construir, expandir ou investir com visao de longo prazo."
-        href="/imoveis?tipo=Terreno"
-        ctaLabel="Ver terrenos"
-        properties={lands}
-        backgroundClassName="bg-white"
-        sectionId="terrenos-title"
-      />
+      {(config?.showTerrenos ?? true) && lands.length > 0 && (
+        <PropertySection
+          eyebrow="Categoria"
+          title="Terrenos e areas"
+          description="Oportunidades para construir, expandir ou investir com visao de longo prazo."
+          href="/imoveis?tipo=Terreno"
+          ctaLabel="Ver terrenos"
+          properties={lands}
+          backgroundClassName="bg-white"
+          sectionId="terrenos-title"
+        />
+      )}
 
       <section className="bg-[#f6f7fb] py-20" aria-labelledby="processo-title">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
@@ -468,6 +490,82 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── Seção Blog ─── */}
+      {blogPosts.length > 0 && (
+        <section className="bg-[#f6f7fb] py-20" aria-labelledby="blog-title">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#2E86DE]">Blog</p>
+                <h2 id="blog-title" className="mt-3 font-display text-4xl font-bold text-[#0D2F5E]">
+                  Artigos e dicas do mercado
+                </h2>
+                <p className="mt-4 text-base leading-7 text-slate-600">
+                  Informação para quem quer tomar decisões melhores na compra, venda ou aluguel.
+                </p>
+              </div>
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 self-start rounded-full border border-[#0D2F5E]/10 bg-white px-5 py-3 text-sm font-semibold text-[#0D2F5E] transition hover:border-[#2E86DE] hover:text-[#2E86DE]"
+              >
+                Ver todos os artigos
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {blogPosts.map(post => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group bg-white rounded-[28px] overflow-hidden border border-slate-200 shadow-[0_4px_24px_-8px_rgba(8,30,63,0.12)] hover:shadow-[0_8px_32px_-8px_rgba(8,30,63,0.2)] hover:border-[#2E86DE]/30 transition-all"
+                  aria-label={`Ler: ${post.title}`}
+                >
+                  <div className="aspect-[16/9] bg-[#dbe7f3] overflow-hidden">
+                    {post.coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.coverUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="font-display text-4xl font-bold text-[#0D2F5E]/20">PP</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    {post.category && (
+                      <span className="inline-block px-2.5 py-0.5 bg-[#E8F1FB] text-[#0D2F5E] text-xs font-medium rounded-full mb-3">
+                        {post.category}
+                      </span>
+                    )}
+                    <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-[#0D2F5E] transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.excerpt && (
+                      <p className="mt-2 text-sm text-slate-500 line-clamp-2">{post.excerpt}</p>
+                    )}
+                    <div className="mt-4 flex items-center justify-between">
+                      {post.publishedAt && (
+                        <span className="flex items-center gap-1 text-xs text-slate-400">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(post.publishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#2E86DE] group-hover:gap-2 transition-all ml-auto">
+                        Ler <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="bg-[#0D2F5E] py-20 text-white" aria-labelledby="contato-title">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_1.1fr] lg:px-8">

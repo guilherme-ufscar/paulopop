@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { prisma } from '@/lib/prisma'
 import { ContactForm } from '@/components/public/ContactForm'
-import { MapPin, Phone, Mail, MessageCircle } from 'lucide-react'
+import { MapPin, Phone, Mail, MessageCircle, UserCircle2 } from 'lucide-react'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -35,9 +36,31 @@ export default async function ContatoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Informações */}
           <div>
-            <h2 className="font-display text-2xl font-bold text-[#0D2F5E] mb-6">
-              Fale com {ownerName}
-            </h2>
+            {/* Foto e apresentação */}
+            <div className="flex items-center gap-5 mb-8">
+              {config?.ownerPhotoUrl ? (
+                <Image
+                  src={config.ownerPhotoUrl}
+                  alt={`Foto de ${ownerName}`}
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 rounded-full object-cover shadow-md flex-shrink-0"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-[#E8F1FB] flex items-center justify-center flex-shrink-0 shadow-md">
+                  <UserCircle2 className="w-12 h-12 text-[#2E86DE]" />
+                </div>
+              )}
+              <div>
+                <h2 className="font-display text-2xl font-bold text-[#0D2F5E]">
+                  Fale com {ownerName}
+                </h2>
+                <p className="text-gray-600 mt-1 text-sm">
+                  Corretor de Imóveis
+                </p>
+              </div>
+            </div>
+
             <p className="text-gray-600 mb-8">
               Estou disponível para ajudá-lo a encontrar o imóvel ideal ou esclarecer qualquer dúvida
               sobre compra, venda ou aluguel de imóveis.

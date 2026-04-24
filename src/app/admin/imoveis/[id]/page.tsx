@@ -44,5 +44,17 @@ export default async function PropertyEditPage({ params }: Props) {
     )
   )
 
+  // Normalizar features/lifestyles para arrays de strings (o formulário espera string[])
+  if (Array.isArray(data.features)) {
+    data.features = data.features.map((f: { feature: string } | string) =>
+      typeof f === 'string' ? f : f.feature
+    )
+  }
+  if (Array.isArray(data.lifestyles)) {
+    data.lifestyles = data.lifestyles.map((l: { lifestyle: string } | string) =>
+      typeof l === 'string' ? l : l.lifestyle
+    )
+  }
+
   return <PropertyForm propertyId={params.id} initialData={data} />
 }

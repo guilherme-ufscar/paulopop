@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, ...result })
     }
   } catch (error) {
-    console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Erro ao fazer upload' }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('Upload error:', message)
+    return NextResponse.json(
+      { error: `Erro ao fazer upload: ${message}` },
+      { status: 500 }
+    )
   }
 }

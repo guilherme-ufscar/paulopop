@@ -1,10 +1,5 @@
 import Link from 'next/link'
 
-const serviceRegions = [
-  'Belem', 'Ananindeua', 'Santarem', 'Barcarena', 'Castanhal',
-  'Salinopolis', 'Altamira', 'Maraba', 'Braganca', 'Macapa',
-]
-
 const navLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/imoveis', label: 'Imoveis' },
@@ -15,15 +10,17 @@ const navLinks = [
 const institutionalLinks = [
   { href: '/imoveis?transacao=comprar', label: 'Imoveis para Comprar' },
   { href: '/imoveis?transacao=alugar', label: 'Imoveis para Alugar' },
+  { href: '/empreendimentos', label: 'Empreendimentos' },
   { href: '/contato', label: 'Atendimento Personalizado' },
 ]
 
 interface FooterProps {
   ownerName?: string
   ownerCompany?: string
+  cities?: string[]
 }
 
-export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
+export function Footer({ ownerName = 'Paulo Pop', ownerCompany, cities = [] }: FooterProps) {
   const currentYear = new Date().getFullYear()
 
   return (
@@ -69,18 +66,25 @@ export function Footer({ ownerName = 'Paulo Pop', ownerCompany }: FooterProps) {
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-blue-300 mb-4">
-              Regioes de Atendimentos
-            </h3>
-            <ul className="grid grid-cols-2 gap-1">
-              {serviceRegions.map(region => (
-                <li key={region}>
-                  <span className="text-blue-200 text-sm">{region}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {cities.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-sm uppercase tracking-widest text-blue-300 mb-4">
+                Regioes de Atendimento
+              </h3>
+              <ul className="grid grid-cols-2 gap-1">
+                {cities.map(city => (
+                  <li key={city}>
+                    <Link
+                      href={`/imoveis?cidade=${encodeURIComponent(city)}`}
+                      className="text-blue-200 hover:text-white text-sm transition-colors"
+                    >
+                      {city}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-widest text-blue-300 mb-4">

@@ -509,9 +509,7 @@ import nextDynamic from 'next/dynamic'
 
 const DescriptionExpanderClient = nextDynamic(() => import('@/components/public/DescriptionExpander'), { ssr: false })
 
-const MapEmbedWrapper = nextDynamic(() =>
-  import('@/components/public/MapEmbed').then(m => m.MapEmbed), { ssr: false }
-)
+import { MapEmbed as MapEmbedWrapper } from '@/components/public/MapEmbed'
 
 // Barra inferior do agente
 function AgentBar({ name, company, avatarUrl, phone, whatsapp, propertySlug }: {
@@ -535,7 +533,7 @@ function AgentBar({ name, company, avatarUrl, phone, whatsapp, propertySlug }: {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}

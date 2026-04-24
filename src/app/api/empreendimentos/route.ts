@@ -25,21 +25,20 @@ export async function GET(request: NextRequest) {
   const skip = (page - 1) * limit
 
   const where: Record<string, unknown> = {}
-  if (!admin) where.status = 'ACTIVE'
+  if (!admin) where.status = 'PUBLISHED'
   if (q) where.name = { contains: q, mode: 'insensitive' }
 
   const [empreendimentos, total] = await Promise.all([
-    prisma.condominium.findMany({
+    prisma.empreendimento.findMany({
       where,
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
         images: { where: { category: 'FACHADA' }, take: 1, orderBy: { order: 'asc' } },
-        _count: { select: { properties: true } },
       },
     }),
-    prisma.condominium.count({ where }),
+    prisma.empreendimento.count({ where }),
   ])
 
   return NextResponse.json({ empreendimentos, total, page, limit, pages: Math.ceil(total / limit) })
@@ -51,17 +50,16 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
   const { name } = body
-
   if (!name?.trim()) return NextResponse.json({ error: 'Nome obrigatório' }, { status: 400 })
 
   const baseSlug = slugify(name)
   let slug = baseSlug
   let counter = 1
-  while (await prisma.condominium.findUnique({ where: { slug } })) {
+  while (await prisma.empreendimento.findUnique({ where: { slug } })) {
     slug = `${baseSlug}-${counter++}`
   }
 
-  const empreendimento = await prisma.condominium.create({
+  const empreendimento = await prisma.empreendimento.create({
     data: { name: name.trim(), slug },
   })
 

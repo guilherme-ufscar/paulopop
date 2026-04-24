@@ -33,7 +33,16 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const config = await prisma.siteConfig.findFirst()
+  const [config, cityRows] = await Promise.all([
+    prisma.siteConfig.findFirst(),
+    prisma.property.findMany({
+      where: { status: 'ACTIVE', city: { not: null } },
+      select: { city: true },
+      distinct: ['city'],
+      orderBy: { city: 'asc' },
+    }),
+  ])
+  const cities = cityRows.map((r: { city: string | null }) => r.city).filter(Boolean) as string[]
 
   return (
     <html lang="pt-BR" className={`${playfair.variable} ${dmSans.variable}`}>
@@ -51,6 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             ownerCompany={config?.ownerCompany ?? undefined}
             whatsapp={config?.ownerWhatsapp ?? process.env.NEXT_PUBLIC_WHATSAPP}
             whatsappMessage={config?.whatsappMessage ?? 'Olá! Tenho interesse em um imóvel.'}
+            cities={cities}
           >
             {children}
           </PublicShell>

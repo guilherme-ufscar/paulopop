@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   User, Phone, Share2, Layout, Search, Mail, Puzzle,
-  Save, Eye, CheckCircle, AlertCircle, Upload, Loader2
+  Save, Eye, CheckCircle, AlertCircle, Upload, Loader2, ImageIcon
 } from 'lucide-react'
 
 const TABS = [
@@ -42,6 +42,7 @@ interface Config {
   metaTitle?: string
   metaDescription?: string
   ogImageUrl?: string
+  logoUrl?: string
   smtpHost?: string
   smtpPort?: string
   smtpUser?: string
@@ -50,6 +51,12 @@ interface Config {
   geminiApiKey?: string
   googleMapsKey?: string
   footerText?: string
+  showDestaques?: boolean
+  showCompra?: boolean
+  showLocacao?: boolean
+  showApartamentos?: boolean
+  showCasas?: boolean
+  showTerrenos?: boolean
 }
 
 export default function ConfiguracoesPage() {
@@ -62,6 +69,7 @@ export default function ConfiguracoesPage() {
   const photoRef = useRef<HTMLInputElement>(null)
   const heroBgRef = useRef<HTMLInputElement>(null)
   const ogRef = useRef<HTMLInputElement>(null)
+  const logoRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch('/api/admin/configuracoes')
@@ -70,7 +78,7 @@ export default function ConfiguracoesPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  function set(field: keyof Config, value: string) {
+  function set(field: keyof Config, value: string | boolean) {
     setConfig(prev => ({ ...prev, [field]: value }))
   }
 
@@ -285,6 +293,52 @@ export default function ConfiguracoesPage() {
           {activeTab === 'aparencia' && (
             <>
               <h2 className="font-semibold text-[#0D2F5E] text-lg">Aparência do Site</h2>
+
+              {/* Logo do site */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Logomarca do Site</label>
+                <p className="text-xs text-gray-400 mb-2">Exibida no cabeçalho do site (PNG transparente recomendado)</p>
+                <div className="flex items-center gap-4">
+                  {config.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={config.logoUrl} alt="Logo do site" className="h-14 max-w-[180px] object-contain border border-gray-200 rounded-xl p-1 bg-white" />
+                  ) : (
+                    <div className="w-20 h-14 rounded-xl bg-gray-100 flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => logoRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-xl text-sm hover:border-[#2E86DE] transition-colors"
+                    aria-label="Alterar logomarca do site"
+                  >
+                    <Upload className="w-4 h-4" /> Alterar logo
+                  </button>
+                  {config.logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => set('logoUrl', '')}
+                      className="text-xs text-red-500 hover:text-red-700"
+                      aria-label="Remover logomarca"
+                    >
+                      Remover
+                    </button>
+                  )}
+                  <input
+                    ref={logoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-hidden="true"
+                    onChange={async e => {
+                      const file = e.target.files?.[0]
+                      if (file) await uploadImage(file, 'logoUrl')
+                    }}
+                  />
+                </div>
+              </div>
+
               <Field label="Título do Hero" value={config.heroTitle} onChange={v => set('heroTitle', v)} />
               <Field label="Subtítulo do Hero" value={config.heroSubtitle} onChange={v => set('heroSubtitle', v)} />
               <Field label="Mensagem padrão WhatsApp" value={config.whatsappMessage} onChange={v => set('whatsappMessage', v)} />
@@ -317,6 +371,46 @@ export default function ConfiguracoesPage() {
                       if (file) await uploadImage(file, 'heroBgUrl')
                     }}
                   />
+                </div>
+              </div>
+
+              {/* Seções da Home */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Seções da página inicial</label>
+                <p className="text-xs text-gray-400 mb-4">
+                  Seções sem imóveis cadastrados ficam ocultas automaticamente, independente desta configuração.
+                </p>
+                <div className="space-y-3">
+                  {([
+                    { field: 'showDestaques',    label: 'Destaques',    desc: 'Vitrine geral de imóveis' },
+                    { field: 'showCompra',        label: 'Compra',       desc: 'Imóveis à venda' },
+                    { field: 'showLocacao',       label: 'Locação',      desc: 'Imóveis para alugar' },
+                    { field: 'showApartamentos',  label: 'Apartamentos', desc: 'Categoria: apartamentos' },
+                    { field: 'showCasas',         label: 'Casas',        desc: 'Categoria: casas e sobrados' },
+                    { field: 'showTerrenos',      label: 'Terrenos',     desc: 'Categoria: terrenos e áreas' },
+                  ] as const).map(({ field, label, desc }) => (
+                    <label key={field} className="flex items-center justify-between gap-4 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">{label}</p>
+                        <p className="text-xs text-gray-400">{desc}</p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={config[field] ?? true}
+                        onClick={() => set(field, !(config[field] ?? true))}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${
+                          (config[field] ?? true) ? 'bg-[#2E86DE]' : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                            (config[field] ?? true) ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </label>
+                  ))}
                 </div>
               </div>
             </>

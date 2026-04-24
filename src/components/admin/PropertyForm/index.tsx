@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Printer, X, Save, CheckCircle, Megaphone, FileText, BarChart3 } from 'lucide-react'
+import { Printer, X, Save, CheckCircle, Megaphone, FileText, BarChart3, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { MarketingPlanModal } from '@/components/admin/MarketingPlanModal'
 import { ContractModal } from '@/components/admin/ContractModal'
@@ -32,6 +32,15 @@ const TABS = [
 
 type TabId = typeof TABS[number]['id']
 
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  DRAFT:     { label: 'Rascunho',  color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+  ACTIVE:    { label: 'Ativo',     color: 'bg-green-100 text-green-800 border-green-200' },
+  SOLD:      { label: 'Vendido',   color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  RENTED:    { label: 'Alugado',   color: 'bg-purple-100 text-purple-800 border-purple-200' },
+  INACTIVE:  { label: 'Inativo',   color: 'bg-gray-100 text-gray-600 border-gray-200' },
+  SUSPENDED: { label: 'Suspenso',  color: 'bg-red-100 text-red-700 border-red-200' },
+}
+
 interface PropertyFormProps {
   propertyId: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,8 +53,19 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
   const [data, setData] = useState<Record<string, unknown>>(initialData)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+  const [currentStatus, setCurrentStatus] = useState<string>(
+    (initialData.status as string) ?? 'DRAFT'
+  )
   const [showMarketingModal, setShowMarketingModal] = useState(false)
   const [showContractModal, setShowContractModal] = useState(false)
+
+  // Limpar mensagem de sucesso após 4 segundos
+  useEffect(() => {
+    if (!saveSuccess) return
+    const t = setTimeout(() => setSaveSuccess(null), 4000)
+    return () => clearTimeout(t)
+  }, [saveSuccess])
 
   // Switches do cabeçalho
   const [transactionType, setTransactionType] = useState<'SALE' | 'RENT'>(
@@ -63,6 +83,7 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
   async function save(status?: string) {
     setSaving(true)
     setSaveError(null)
+    setSaveSuccess(null)
     try {
       const payload: Record<string, unknown> = {
         ...data,
@@ -82,6 +103,18 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.error ?? 'Erro ao salvar')
       }
+
+      // Atualizar status exibido no cabeçalho
+      const newStatus = status ?? currentStatus
+      setCurrentStatus(newStatus)
+
+      if (newStatus === 'DRAFT') {
+        setSaveSuccess('Rascunho salvo com sucesso!')
+      } else if (newStatus === 'ACTIVE') {
+        setSaveSuccess('Imóvel publicado e ativado com sucesso!')
+      } else {
+        setSaveSuccess('Imóvel salvo com sucesso!')
+      }
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Erro ao salvar')
     } finally {
@@ -89,17 +122,58 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
     }
   }
 
+  const statusInfo = STATUS_LABELS[currentStatus] ?? STATUS_LABELS.DRAFT
+
   return (
     <div className="flex flex-col h-full min-h-screen bg-[#F0F4F8]">
+      {/* Toast de sucesso — fixo no topo direito */}
+      {saveSuccess && (
+        <div
+          role="alert"
+          className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm font-medium animate-in slide-in-from-top-2"
+        >
+          <CheckCircle className="w-4 h-4 shrink-0" />
+          {saveSuccess}
+        </div>
+      )}
+
+      {/* Toast de erro — fixo no topo direito */}
+      {saveError && (
+        <div
+          role="alert"
+          className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm font-medium max-w-sm"
+        >
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{saveError}</span>
+          <button
+            type="button"
+            onClick={() => setSaveError(null)}
+            className="ml-2 text-white/80 hover:text-white"
+            aria-label="Fechar"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Cabeçalho do formulário */}
       <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 sticky top-0 z-10 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Ref</p>
-            <p className="text-sm font-semibold text-[#0D2F5E]">{initialData.ref ?? propertyId}</p>
-            {initialData.agent && (
-              <p className="text-xs text-gray-500">{(initialData.agent as { name: string }).name}</p>
-            )}
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Ref</p>
+              <p className="text-sm font-semibold text-[#0D2F5E]">{initialData.ref ?? propertyId}</p>
+              {initialData.agent && (
+                <p className="text-xs text-gray-500">{(initialData.agent as { name: string }).name}</p>
+              )}
+            </div>
+            {/* Badge de status atual */}
+            <span
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${statusInfo.color}`}
+              aria-label={`Status: ${statusInfo.label}`}
+            >
+              {statusInfo.label}
+            </span>
           </div>
 
           {/* Switches */}
@@ -202,12 +276,6 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
 
       {/* Conteúdo da aba */}
       <div className="flex-1 p-4 md:p-6">
-        {saveError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-            {saveError}
-          </div>
-        )}
-
         <div role="tabpanel">
           {activeTab === 'principal' && (
             <TabPrincipal data={data} onChange={handleChange} />
@@ -310,18 +378,20 @@ export function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
               size="sm"
               onClick={() => save('DRAFT')}
               loading={saving}
+              disabled={saving}
             >
               <Save className="w-4 h-4 mr-1" />
-              Salvar Rascunho
+              {currentStatus === 'DRAFT' ? 'Salvar Rascunho' : 'Salvar como Rascunho'}
             </Button>
             <Button
               variant="primary"
               size="sm"
               onClick={() => save('ACTIVE')}
               loading={saving}
+              disabled={saving}
             >
               <CheckCircle className="w-4 h-4 mr-1" />
-              Salvar e Ativar
+              {currentStatus === 'ACTIVE' ? 'Salvar Alterações' : 'Salvar e Ativar'}
             </Button>
           </div>
         </div>

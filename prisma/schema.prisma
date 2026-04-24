@@ -34,6 +34,7 @@ model User {
   properties    Property[]
   leads         Lead[]
   activities    Activity[]
+  blogPosts     BlogPost[]
 
   @@map("users")
 }
@@ -427,76 +428,17 @@ enum LeadStatus {
   LOST
 }
 
-// ─── Condomínios/Empreendimentos ──────────────────────────────────────────────
+// ─── Condomínios ─────────────────────────────────────────────────────────────
 
 model Condominium {
   id           String      @id @default(cuid())
-  slug         String      @unique @default(cuid())
   name         String
-  subtitle     String?
-  description  String?     @db.Text
-  status       EmpreendimentoStatus @default(DRAFT)
-
-  // Tipologias / Apartamentos
-  tipologiasDescription String? @db.Text
-
-  // Área de lazer
-  lazerDescription String? @db.Text
-
-  // Localização
   address      String?
-  neighborhood String?
   city         String?
   state        String?
   zipCode      String?
-  latitude     Decimal?    @db.Decimal(10, 7)
-  longitude    Decimal?    @db.Decimal(10, 7)
-  locationDescription String? @db.Text
-
-  // Financeiro
-  priceFrom    Decimal?    @db.Decimal(15, 2)
-  priceTo      Decimal?    @db.Decimal(15, 2)
-  paymentInfo  String?     @db.Text
-  banks        String?     @db.Text
-
-  // Metadados
-  totalUnits   Int?
-  deliveryDate String?
-
   properties   Property[]
-  images       EmpreendimentoImage[]
-
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
   @@map("condominiums")
-}
-
-enum EmpreendimentoStatus {
-  DRAFT
-  ACTIVE
-}
-
-model EmpreendimentoImage {
-  id              String      @id @default(cuid())
-  condominiumId   String
-  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
-  url             String
-  thumbnailUrl    String?
-  alt             String?
-  caption         String?
-  order           Int         @default(0)
-  category        EmpreendimentoImageCategory @default(FACHADA)
-
-  @@map("empreendimento_images")
-}
-
-enum EmpreendimentoImageCategory {
-  FACHADA
-  AREAS_COMUNS
-  TIPOLOGIA
-  LAZER
-  LOCALIZACAO
 }
 
 // ─── Análise de Mercado ───────────────────────────────────────────────────────
@@ -576,29 +518,164 @@ enum ActivityType {
 // ─── Configurações do Site ────────────────────────────────────────────────────
 
 model SiteConfig {
-  id              String    @id @default(cuid())
-  ownerName       String    @default("Paulo Pop")
-  ownerPhotoUrl   String?
-  ownerCreci      String?
-  ownerBio        String?   @db.Text
-  ownerWhatsapp   String?
-  ownerPhone      String?
-  ownerEmail      String?
-  ownerInstagram  String?
-  ownerFacebook   String?
-  ownerLinkedin   String?
-  ownerYoutube    String?
-  ownerTelegram   String?
-  ownerCompany    String?
-  ownerAddress    String?
-  metaTitle       String?
-  metaDescription String?
-  heroTitle       String?
-  heroSubtitle    String?
-  heroBgUrl       String?
-  footerText      String?
-  whatsappMessage String?
-  updatedAt       DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  ownerName         String    @default("Paulo Pop")
+  ownerPhotoUrl     String?
+  ownerCreci        String?
+  ownerBio          String?   @db.Text
+  ownerWhatsapp     String?
+  ownerPhone        String?
+  ownerEmail        String?
+  ownerInstagram    String?
+  ownerFacebook     String?
+  ownerLinkedin     String?
+  ownerYoutube      String?
+  ownerTelegram     String?
+  ownerCompany      String?
+  ownerCompanyCreci String?
+  ownerTwitter      String?
+  ownerAddress      String?
+  logoUrl           String?
+  ogImageUrl        String?
+  metaTitle         String?
+  metaDescription   String?
+  heroTitle         String?
+  heroSubtitle      String?
+  heroBgUrl         String?
+  footerText        String?
+  whatsappMessage   String?
+  // Visibilidade das seções da home
+  showDestaques     Boolean   @default(true)
+  showCompra        Boolean   @default(true)
+  showLocacao       Boolean   @default(true)
+  showApartamentos  Boolean   @default(true)
+  showCasas         Boolean   @default(true)
+  showTerrenos      Boolean   @default(true)
+  updatedAt         DateTime  @updatedAt
 
   @@map("site_config")
+}
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+
+model BlogPost {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  excerpt     String?        @db.Text
+  content     String         @db.Text
+  coverUrl    String?
+  category    String?
+  tags        String[]       @default([])
+  status      BlogPostStatus @default(DRAFT)
+  authorId    String
+  author      User           @relation(fields: [authorId], references: [id])
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status, publishedAt])
+  @@map("blog_posts")
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// ─── Empreendimentos ──────────────────────────────────────────────────────────
+
+model Empreendimento {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  tagline         String?
+  description     String?  @db.Text
+  status          String   @default("DRAFT") // DRAFT | PUBLISHED
+  // Localização
+  address         String?
+  neighborhood    String?
+  city            String?
+  state           String?
+  zipCode         String?
+  latitude        Float?
+  longitude       Float?
+  locationDescription String? @db.Text
+  // Detalhes técnicos
+  architect       String?
+  deliveryDate    String?
+  totalUnits      Int?
+  floors          Int?
+  bedroomsMin     Int?
+  bedroomsMax     Int?
+  areaMin         Float?
+  areaMax         Float?
+  priceMin        Decimal? @db.Decimal(15,2)
+  priceMax        Decimal? @db.Decimal(15,2)
+  // Financiamento
+  financing       String?
+  paymentInfo     String?  @db.Text
+  banks           String?  @db.Text
+  // Descrições por seção
+  tipologiasDescription String? @db.Text
+  lazerDescription      String? @db.Text
+  // Mídia
+  coverUrl        String?
+  logoUrl         String?
+  images          EmpreendimentoImage[]
+  floorPlanImages EmpreendimentoFloorPlan[]
+  // Diferenciais / amenidades (JSON array de strings)
+  amenities       String?  @db.Text
+  highlights      String?  @db.Text
+  // CTA
+  ctaLabel        String?
+  ctaWhatsapp     String?
+  ctaUrl          String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("empreendimentos")
+}
+
+model EmpreendimentoImage {
+  id                String          @id @default(cuid())
+  empreendimentoId  String
+  url               String
+  thumbnailUrl      String?
+  caption           String?
+  alt               String?
+  order             Int             @default(0)
+  category          String          @default("FACHADA") // FACHADA | AREAS_COMUNS | LAZER | LOCALIZACAO
+  empreendimento    Empreendimento  @relation(fields: [empreendimentoId], references: [id], onDelete: Cascade)
+
+  @@map("empreendimento_images")
+}
+
+model EmpreendimentoFloorPlan {
+  id                String          @id @default(cuid())
+  empreendimentoId  String
+  url               String
+  caption           String?
+  order             Int             @default(0)
+  empreendimento    Empreendimento  @relation(fields: [empreendimentoId], references: [id], onDelete: Cascade)
+
+  @@map("empreendimento_floor_plans")
+}
+
+// ─── Depoimentos ─────────────────────────────────────────────────────────────
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  text      String
+  rating    Int      @default(5)
+  avatarUrl String?
+  source    String?  @default("manual")
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
 }
