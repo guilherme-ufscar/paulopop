@@ -431,13 +431,72 @@ enum LeadStatus {
 
 model Condominium {
   id           String      @id @default(cuid())
+  slug         String      @unique @default(cuid())
   name         String
+  subtitle     String?
+  description  String?     @db.Text
+  status       EmpreendimentoStatus @default(DRAFT)
+
+  // Tipologias / Apartamentos
+  tipologiasDescription String? @db.Text
+
+  // Área de lazer
+  lazerDescription String? @db.Text
+
+  // Localização
   address      String?
+  neighborhood String?
   city         String?
   state        String?
   zipCode      String?
+  latitude     Decimal?    @db.Decimal(10, 7)
+  longitude    Decimal?    @db.Decimal(10, 7)
+  locationDescription String? @db.Text
+
+  // Financeiro
+  priceFrom    Decimal?    @db.Decimal(15, 2)
+  priceTo      Decimal?    @db.Decimal(15, 2)
+  paymentInfo  String?     @db.Text
+  banks        String?     @db.Text
+
+  // Metadados
+  totalUnits   Int?
+  deliveryDate String?
+
   properties   Property[]
+  images       EmpreendimentoImage[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
   @@map("condominiums")
+}
+
+enum EmpreendimentoStatus {
+  DRAFT
+  ACTIVE
+}
+
+model EmpreendimentoImage {
+  id              String      @id @default(cuid())
+  condominiumId   String
+  condominium     Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+  url             String
+  thumbnailUrl    String?
+  alt             String?
+  caption         String?
+  order           Int         @default(0)
+  category        EmpreendimentoImageCategory @default(FACHADA)
+
+  @@map("empreendimento_images")
+}
+
+enum EmpreendimentoImageCategory {
+  FACHADA
+  AREAS_COMUNS
+  TIPOLOGIA
+  LAZER
+  LOCALIZACAO
 }
 
 // ─── Análise de Mercado ───────────────────────────────────────────────────────

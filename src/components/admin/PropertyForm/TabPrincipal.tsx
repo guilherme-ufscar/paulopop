@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { cn } from '@/lib/utils'
@@ -165,6 +165,8 @@ function FieldRow({ children, cols = 2 }: { children: React.ReactNode; cols?: nu
   )
 }
 
+interface EmpreendimentoOption { id: string; name: string }
+
 export function TabPrincipal({ data, onChange }: TabPrincipalProps) {
   const features = (data.features as string[]) ?? []
   const lifestyles = (data.lifestyles as string[]) ?? []
@@ -172,6 +174,14 @@ export function TabPrincipal({ data, onChange }: TabPrincipalProps) {
   const parkingSpots = (data.parkingSpots as ParkingSpotRow[]) ?? [{ quantity: '', type: '' }]
   const rooms = (data.rooms as RoomRow[]) ?? []
   const [showAllFeatures, setShowAllFeatures] = useState(false)
+  const [empreendimentos, setEmpreendimentos] = useState<EmpreendimentoOption[]>([])
+
+  useEffect(() => {
+    fetch('/api/empreendimentos?admin=true&limit=100')
+      .then(r => r.json())
+      .then(d => setEmpreendimentos(d.empreendimentos ?? []))
+      .catch(() => {})
+  }, [])
 
   const toggleFeature = (val: string) => {
     onChange('features', features.includes(val) ? features.filter(f => f !== val) : [...features, val])
@@ -257,6 +267,28 @@ export function TabPrincipal({ data, onChange }: TabPrincipalProps) {
           />
         </FieldRow>
       </section>
+
+      {/* ── Empreendimento ───────────────────────────────────────────────────── */}
+      {empreendimentos.length > 0 && (
+        <section>
+          <SectionTitle>Empreendimento</SectionTitle>
+          <FieldRow cols={2}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Vinculado ao empreendimento</label>
+              <select
+                value={(data.condominiumId as string) ?? ''}
+                onChange={e => onChange('condominiumId', e.target.value || null)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E86DE]"
+              >
+                <option value="">— Nenhum —</option>
+                {empreendimentos.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </select>
+            </div>
+          </FieldRow>
+        </section>
+      )}
 
       {/* ── Preço e Custos Adicionais ────────────────────────────────────────── */}
       <section>

@@ -10,6 +10,8 @@ const pageTitles: Record<string, string> = {
   '/admin': 'Dashboard',
   '/admin/imoveis': 'Imóveis',
   '/admin/imoveis/novo': 'Novo Imóvel',
+  '/admin/empreendimentos': 'Empreendimentos',
+  '/admin/empreendimentos/novo': 'Novo Empreendimento',
   '/admin/contatos': 'Leads & Contatos',
   '/admin/analise-mercado': 'Análise de Mercado',
   '/admin/marketing': 'Marketing',
