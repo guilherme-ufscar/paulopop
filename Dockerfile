@@ -49,15 +49,16 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/dist-scripts ./dist-scripts
 COPY --from=builder /app/scripts/docker-start.sh ./scripts/docker-start.sh
 
-# Adiciona o CLI do Prisma ao standalone para o `prisma migrate deploy`
+# Adiciona o CLI do Prisma e engines ao standalone para o `prisma migrate deploy`
 COPY --from=deps /app/node_modules/prisma ./node_modules/prisma
+COPY --from=deps /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=deps /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 RUN mkdir -p ./public/uploads/images ./public/uploads/documents && \
     chmod +x ./scripts/docker-start.sh && \
     chown -R nextjs:nodejs \
       ./public/uploads ./prisma ./dist-scripts \
-      ./scripts ./prisma.config.ts ./node_modules/prisma
+      ./scripts ./prisma.config.ts ./node_modules/prisma ./node_modules/@prisma
 
 USER nextjs
 EXPOSE 3000
