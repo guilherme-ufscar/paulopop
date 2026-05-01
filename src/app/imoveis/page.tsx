@@ -116,6 +116,8 @@ async function PropertyGrid({ searchParams }: { searchParams: SearchParams }) {
         status: true,
         price: true,
         totalArea: true,
+        usefulArea: true,
+        suites: true,
         bedrooms: true,
         bathrooms: true,
         environments: true,
@@ -160,6 +162,8 @@ async function PropertyGrid({ searchParams }: { searchParams: SearchParams }) {
             {...p}
             price={p.price ? Number(p.price) : null}
             totalArea={p.totalArea ? Number(p.totalArea) : null}
+            usefulArea={p.usefulArea ? Number(p.usefulArea) : null}
+            suites={p.suites ?? null}
             coverImage={p.images[0]?.thumbnailUrl ?? p.images[0]?.url ?? null}
             isNew={p.createdAt > thirtyDaysAgo}
           />

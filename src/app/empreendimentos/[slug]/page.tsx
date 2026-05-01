@@ -114,11 +114,19 @@ export default async function EmpreendimentoPage({ params }: Props) {
                 </span>
               </div>
             )}
+            {(emp.suitesMin || emp.suitesMax) && (
+              <div className="flex items-center gap-2 text-white">
+                <Bed className="w-4 h-4 text-[#2E86DE]" />
+                <span className="text-sm">
+                  <strong>{emp.suitesMin === emp.suitesMax ? emp.suitesMin : `${emp.suitesMin ?? '?'} a ${emp.suitesMax ?? '?'}`}</strong> suítes
+                </span>
+              </div>
+            )}
             {(emp.areaMin || emp.areaMax) && (
               <div className="flex items-center gap-2 text-white">
                 <Maximize2 className="w-4 h-4 text-[#2E86DE]" />
                 <span className="text-sm">
-                  <strong>{emp.areaMin === emp.areaMax ? `${emp.areaMin}m²` : `${emp.areaMin ?? '?'} – ${emp.areaMax ?? '?'}m²`}</strong>
+                  <strong>{emp.areaMin === emp.areaMax ? `${emp.areaMin}m²` : `${emp.areaMin ?? '?'} – ${emp.areaMax ?? '?'}m²`}</strong> área privativa
                 </span>
               </div>
             )}
@@ -188,7 +196,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
 
             {/* Vídeo */}
             {emp.youtubeUrl && (() => {
-              const match = emp.youtubeUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
+              const match = emp.youtubeUrl.match(/(?:shorts\/|v=|youtu\.be\/)([^&?/\s]+)/)
               if (!match) return null
               return (
                 <section>
@@ -243,9 +251,20 @@ export default async function EmpreendimentoPage({ params }: Props) {
                         <div className="flex items-center gap-2 p-3 bg-[#F0F4F8] rounded-xl">
                           <Maximize2 className="w-4 h-4 text-[#2E86DE]" />
                           <div>
-                            <p className="text-xs text-gray-400">Área</p>
+                            <p className="text-xs text-gray-400">Área Privativa</p>
                             <p className="font-semibold text-sm text-[#0D2F5E]">
                               {emp.areaMin === emp.areaMax ? `${emp.areaMin}m²` : `${emp.areaMin ?? '?'} – ${emp.areaMax ?? '?'}m²`}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      {(emp.suitesMin || emp.suitesMax) && (
+                        <div className="flex items-center gap-2 p-3 bg-[#F0F4F8] rounded-xl">
+                          <Bed className="w-4 h-4 text-[#2E86DE]" />
+                          <div>
+                            <p className="text-xs text-gray-400">Suítes</p>
+                            <p className="font-semibold text-sm text-[#0D2F5E]">
+                              {emp.suitesMin === emp.suitesMax ? emp.suitesMin : `${emp.suitesMin ?? '?'} a ${emp.suitesMax ?? '?'}`}
                             </p>
                           </div>
                         </div>
@@ -403,6 +422,24 @@ export default async function EmpreendimentoPage({ params }: Props) {
           {/* Formulário lateral */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-24">
+              {/* Foto e dados do corretor */}
+              <div className="flex items-center gap-3 mb-5 pb-5 border-b border-gray-100">
+                <div className="w-14 h-14 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0 relative">
+                  {ownerPhoto ? (
+                    <Image src={ownerPhoto} alt={ownerName} fill sizes="56px" className="object-cover" />
+                  ) : (
+                    <Building2 className="w-7 h-7 m-3.5 text-gray-300" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-[#0D2F5E] text-sm truncate">{ownerName}</p>
+                  {ownerCompany && <p className="text-xs text-gray-400 truncate">{ownerCompany}</p>}
+                  {ownerCreci && <p className="text-xs text-gray-400">CRECI: {ownerCreci}</p>}
+                  {ownerPhone && (
+                    <a href={`tel:${ownerPhone}`} className="text-xs text-[#2E86DE] hover:underline">{ownerPhone}</a>
+                  )}
+                </div>
+              </div>
               <h2 className="font-display text-lg font-bold text-[#0D2F5E] mb-1">Tenho interesse!</h2>
               <p className="text-sm text-gray-400 mb-5">Deixe seu contato e entraremos em breve.</p>
               <ContactForm whatsapp={ownerWhatsapp} />

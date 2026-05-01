@@ -49,6 +49,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
       floors:       body.floors       !== undefined ? (body.floors ? Number(body.floors) : null) : undefined,
       bedroomsMin:  body.bedroomsMin  !== undefined ? (body.bedroomsMin ? Number(body.bedroomsMin) : null) : undefined,
       bedroomsMax:  body.bedroomsMax  !== undefined ? (body.bedroomsMax ? Number(body.bedroomsMax) : null) : undefined,
+      suitesMin:    body.suitesMin    !== undefined ? (body.suitesMin ? Number(body.suitesMin) : null) : undefined,
+      suitesMax:    body.suitesMax    !== undefined ? (body.suitesMax ? Number(body.suitesMax) : null) : undefined,
       areaMin:      body.areaMin      !== undefined ? (body.areaMin ? Number(body.areaMin) : null) : undefined,
       areaMax:      body.areaMax      !== undefined ? (body.areaMax ? Number(body.areaMax) : null) : undefined,
       priceMin:     body.priceMin     !== undefined ? (body.priceMin ? Number(body.priceMin) : null) : undefined,

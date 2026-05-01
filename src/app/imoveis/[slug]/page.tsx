@@ -91,6 +91,7 @@ export default async function PropertyPage({ params }: Props) {
         features: true,
         lifestyles: true,
         documents: { where: { isPublic: true } },
+        videos: true,
         agent: { select: { name: true, avatarUrl: true, company: true, phone: true, whatsapp: true } },
       },
     }),
@@ -386,6 +387,29 @@ export default async function PropertyPage({ params }: Props) {
                 </div>
               )}
 
+              {/* Vídeos YouTube */}
+              {property.videos && property.videos.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
+                  <h2 className="font-semibold text-[#0D2F5E]">Vídeos</h2>
+                  {property.videos.map((v, i) => {
+                    const match = v.youtubeUrl?.match(/(?:shorts\/|v=|youtu\.be\/)([^&?/\s]+)/)
+                    if (!match) return null
+                    return (
+                      <div key={i} className="aspect-video rounded-xl overflow-hidden bg-gray-100">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${match[1]}`}
+                          title={`Vídeo ${i + 1}`}
+                          className="w-full h-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          loading="lazy"
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
               {/* Tour Virtual */}
               {property.virtualTourUrl && property.virtualTourType !== 'NONE' && (
                 <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -432,6 +456,23 @@ export default async function PropertyPage({ params }: Props) {
             {/* Coluna direita — formulário */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-24">
+                {/* Foto e dados do corretor */}
+                <div className="flex items-center gap-3 mb-5 pb-5 border-b border-gray-100">
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-[#F0F4F8] flex-shrink-0 relative">
+                    {property.agent.avatarUrl ? (
+                      <Image src={property.agent.avatarUrl} alt={agentName} fill sizes="56px" className="object-cover" />
+                    ) : (
+                      <Building2 className="w-7 h-7 m-3.5 text-gray-300" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#0D2F5E] text-sm truncate">{agentName}</p>
+                    {agentCompany && <p className="text-xs text-gray-400 truncate">{agentCompany}</p>}
+                    {property.agent.phone && (
+                      <a href={`tel:${property.agent.phone}`} className="text-xs text-[#2E86DE] hover:underline">{property.agent.phone}</a>
+                    )}
+                  </div>
+                </div>
                 <h2 className="font-display text-lg font-bold text-[#0D2F5E] mb-1">
                   Envie sua mensagem!
                 </h2>

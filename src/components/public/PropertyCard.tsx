@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { memo } from 'react'
-import { Bed, Bath, LayoutGrid, Maximize2, Car, Heart, Share2 } from 'lucide-react'
+import { Bed, Bath, LayoutGrid, Maximize2, Car, Heart, Share2, BedDouble } from 'lucide-react'
 import { formatCurrency } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 
@@ -16,6 +16,8 @@ interface PropertyCardProps {
   status: string
   price?: number | null
   totalArea?: number | null
+  usefulArea?: number | null
+  suites?: number | null
   bedrooms?: number | null
   bathrooms?: number | null
   environments?: number | null
@@ -50,6 +52,8 @@ function PropertyCardComponent({
   status,
   price,
   totalArea,
+  usefulArea,
+  suites,
   bedrooms,
   bathrooms,
   environments,
@@ -157,6 +161,12 @@ function PropertyCardComponent({
               {bedrooms}
             </span>
           )}
+          {(suites ?? 0) > 0 && (
+            <span className="flex items-center gap-1" aria-label={`${suites} suítes`}>
+              <BedDouble className="w-3.5 h-3.5 text-[#2E86DE]" />
+              {suites}
+            </span>
+          )}
           {(bathrooms ?? 0) > 0 && (
             <span className="flex items-center gap-1" aria-label={`${bathrooms} banheiros`}>
               <Bath className="w-3.5 h-3.5 text-[#2E86DE]" />
@@ -169,10 +179,10 @@ function PropertyCardComponent({
               {environments}
             </span>
           )}
-          {totalArea && (
-            <span className="flex items-center gap-1" aria-label={`${totalArea} m²`}>
+          {(usefulArea ?? totalArea) && (
+            <span className="flex items-center gap-1" aria-label={`${usefulArea ?? totalArea} m² útil`}>
               <Maximize2 className="w-3.5 h-3.5 text-[#2E86DE]" />
-              {totalArea} m²
+              {usefulArea ?? totalArea} m² útil
             </span>
           )}
           {(totalParkingSpots ?? 0) > 0 && (

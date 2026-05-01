@@ -608,6 +608,8 @@ model Empreendimento {
   floors          Int?
   bedroomsMin     Int?
   bedroomsMax     Int?
+  suitesMin       Int?
+  suitesMax       Int?
   areaMin         Float?
   areaMax         Float?
   priceMin        Decimal? @db.Decimal(15,2)

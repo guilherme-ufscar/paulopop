@@ -13,7 +13,7 @@ interface FormData {
   address: string; neighborhood: string; city: string; state: string; zipCode: string
   latitude: string; longitude: string; locationDescription: string
   deliveryDate: string; totalUnits: string; floors: string; architect: string
-  bedroomsMin: string; bedroomsMax: string; areaMin: string; areaMax: string
+  bedroomsMin: string; bedroomsMax: string; suitesMin: string; suitesMax: string; areaMin: string; areaMax: string
   priceMin: string; priceMax: string; financing: string; paymentInfo: string; banks: string
   amenities: string; highlights: string
   ctaLabel: string; ctaWhatsapp: string
@@ -53,6 +53,7 @@ export default function EmpreendimentoEditPage() {
     latitude: '', longitude: '', locationDescription: '',
     deliveryDate: '', totalUnits: '', floors: '', architect: '',
     bedroomsMin: '', bedroomsMax: '', areaMin: '', areaMax: '',
+    suitesMin: '', suitesMax: '',
     priceMin: '', priceMax: '', financing: '', paymentInfo: '', banks: '',
     amenities: '', highlights: '',
     ctaLabel: '', ctaWhatsapp: '',
@@ -81,6 +82,8 @@ export default function EmpreendimentoEditPage() {
           architect: data.architect ?? '',
           bedroomsMin: data.bedroomsMin ? String(data.bedroomsMin) : '',
           bedroomsMax: data.bedroomsMax ? String(data.bedroomsMax) : '',
+          suitesMin: data.suitesMin ? String(data.suitesMin) : '',
+          suitesMax: data.suitesMax ? String(data.suitesMax) : '',
           areaMin: data.areaMin ? String(data.areaMin) : '',
           areaMax: data.areaMax ? String(data.areaMax) : '',
           priceMin: data.priceMin ? String(data.priceMin) : '',
@@ -262,14 +265,18 @@ export default function EmpreendimentoEditPage() {
         <div className="space-y-6">
           <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
             <h2 className="font-semibold text-[#0D2F5E]">Apartamentos e Tipologias</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Quartos (mín)</label>
                 <input type="number" value={form.bedroomsMin} onChange={set('bedroomsMin')} className={inputCls} placeholder="2" /></div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Quartos (máx)</label>
                 <input type="number" value={form.bedroomsMax} onChange={set('bedroomsMax')} className={inputCls} placeholder="4" /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Área mín (m²)</label>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Suítes (mín)</label>
+                <input type="number" value={form.suitesMin} onChange={set('suitesMin')} className={inputCls} placeholder="1" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Suítes (máx)</label>
+                <input type="number" value={form.suitesMax} onChange={set('suitesMax')} className={inputCls} placeholder="2" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Área privativa mín (m²)</label>
                 <input type="number" value={form.areaMin} onChange={set('areaMin')} className={inputCls} placeholder="65" /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Área máx (m²)</label>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Área privativa máx (m²)</label>
                 <input type="number" value={form.areaMax} onChange={set('areaMax')} className={inputCls} placeholder="120" /></div>
             </div>
             <div>
@@ -385,7 +392,7 @@ export default function EmpreendimentoEditPage() {
               <p className="text-xs text-gray-400 mt-1">Cole o link completo do vídeo (não use Shorts)</p>
             </div>
             {form.youtubeUrl && (() => {
-              const match = form.youtubeUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
+              const match = form.youtubeUrl.match(/(?:shorts\/|v=|youtu\.be\/)([^&?/\s]+)/)
               if (!match) return <p className="text-xs text-red-500">Link inválido</p>
               return (
                 <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
