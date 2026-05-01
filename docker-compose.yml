@@ -23,6 +23,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
+      cache_from:
+        - paulopop-app:local
     env_file:
       - .env.local
     container_name: paulopop_app

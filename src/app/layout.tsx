@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import { Playfair_Display, DM_Sans } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { Providers } from './providers'
 import { PublicShell } from '@/components/public/PublicShell'
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="pt-BR" className={`${playfair.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased bg-white text-gray-900">
+        <Script src="https://elfsightcdn.com/platform.js" strategy="afterInteractive" />
         <Providers>
           {/* Skip link — acessibilidade (5.3) */}
           <a
