@@ -17,6 +17,7 @@ interface FormData {
   priceMin: string; priceMax: string; financing: string; paymentInfo: string; banks: string
   amenities: string; highlights: string
   ctaLabel: string; ctaWhatsapp: string
+  youtubeUrl: string; virtualTourUrl: string; virtualTourType: string
 }
 
 const TABS = [
@@ -25,6 +26,7 @@ const TABS = [
   { id: 'lazer', label: 'Área de Lazer' },
   { id: 'localizacao', label: 'Localização' },
   { id: 'financeiro', label: 'Financeiro' },
+  { id: 'midia', label: 'Vídeos' },
 ]
 
 const STATES = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
@@ -54,6 +56,7 @@ export default function EmpreendimentoEditPage() {
     priceMin: '', priceMax: '', financing: '', paymentInfo: '', banks: '',
     amenities: '', highlights: '',
     ctaLabel: '', ctaWhatsapp: '',
+    youtubeUrl: '', virtualTourUrl: '', virtualTourType: 'NONE',
   }
 
   const [form, setForm] = useState<FormData>(emptyForm)
@@ -86,6 +89,8 @@ export default function EmpreendimentoEditPage() {
           banks: data.banks ?? '',
           amenities: data.amenities ?? '', highlights: data.highlights ?? '',
           ctaLabel: data.ctaLabel ?? '', ctaWhatsapp: data.ctaWhatsapp ?? '',
+          youtubeUrl: data.youtubeUrl ?? '', virtualTourUrl: data.virtualTourUrl ?? '',
+          virtualTourType: data.virtualTourType ?? 'NONE',
         })
         setImages(data.images ?? [])
         setFloorPlanImages(data.floorPlanImages ?? [])
@@ -365,6 +370,56 @@ export default function EmpreendimentoEditPage() {
               <textarea value={form.banks} onChange={set('banks')} rows={3} className={inputCls}
                 placeholder="Caixa Econômica Federal, Banco do Brasil, Bradesco..." />
             </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'midia' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-6">
+            <h2 className="font-semibold text-[#0D2F5E]">Vídeo YouTube</h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Link do YouTube</label>
+              <input value={form.youtubeUrl} onChange={set('youtubeUrl')} className={inputCls}
+                placeholder="https://www.youtube.com/watch?v=..." />
+              <p className="text-xs text-gray-400 mt-1">Cole o link completo do vídeo (não use Shorts)</p>
+            </div>
+            {form.youtubeUrl && (() => {
+              const match = form.youtubeUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
+              if (!match) return <p className="text-xs text-red-500">Link inválido</p>
+              return (
+                <div className="aspect-video rounded-xl overflow-hidden bg-gray-100">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${match[1]}`}
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    title="Preview do vídeo"
+                  />
+                </div>
+              )
+            })()}
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
+            <h2 className="font-semibold text-[#0D2F5E]">Tour Virtual</h2>
+            <div className="flex gap-6">
+              {(['NONE', 'OTHER'] as const).map(v => (
+                <label key={v} className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="virtualTourType" value={v}
+                    checked={form.virtualTourType === v}
+                    onChange={() => setForm(prev => ({ ...prev, virtualTourType: v }))}
+                    className="accent-[#2E86DE]" />
+                  <span className="text-sm text-gray-700">{v === 'NONE' ? 'Nenhum' : 'Tour Virtual'}</span>
+                </label>
+              ))}
+            </div>
+            {form.virtualTourType !== 'NONE' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link do Tour Virtual</label>
+                <input value={form.virtualTourUrl} onChange={set('virtualTourUrl')} className={inputCls}
+                  placeholder="https://..." />
+              </div>
+            )}
           </div>
         </div>
       )}

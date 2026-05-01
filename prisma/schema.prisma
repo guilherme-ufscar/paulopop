@@ -622,6 +622,9 @@ model Empreendimento {
   // Mídia
   coverUrl        String?
   logoUrl         String?
+  youtubeUrl      String?
+  virtualTourUrl  String?
+  virtualTourType String?  @default("NONE")
   images          EmpreendimentoImage[]
   floorPlanImages EmpreendimentoFloorPlan[]
   // Diferenciais / amenidades (JSON array de strings)

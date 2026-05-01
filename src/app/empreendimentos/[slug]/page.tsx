@@ -7,10 +7,11 @@ import { prisma } from '@/lib/prisma'
 import { ContactForm } from '@/components/public/ContactForm'
 import { formatCurrency } from '@/lib/formatters'
 import type { Metadata } from 'next'
+import { PropertyGallery } from '@/components/public/PropertyGallery'
 import {
   MapPin, ChevronRight, MessageCircle, Phone,
   Building2, Bed, Bath, Car, Maximize2, Calendar,
-  Layers, DollarSign, TreePine, Navigation, CheckCircle
+  Layers, DollarSign, TreePine, Navigation, CheckCircle, PlayCircle
 } from 'lucide-react'
 
 interface Props { params: { slug: string } }
@@ -181,7 +182,42 @@ export default async function EmpreendimentoPage({ params }: Props) {
             {heroImages.length > 0 && (
               <section>
                 <SectionTitle>Fachada e Áreas Comuns</SectionTitle>
-                <ImageGallery images={heroImages.map(i => ({ url: i.url, alt: i.caption ?? undefined }))} />
+                <PropertyGallery images={heroImages.map(i => ({ url: i.url, alt: i.caption ?? undefined }))} title={emp.name} />
+              </section>
+            )}
+
+            {/* Vídeo */}
+            {emp.youtubeUrl && (() => {
+              const match = emp.youtubeUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
+              if (!match) return null
+              return (
+                <section>
+                  <SectionTitle icon={<PlayCircle className="w-5 h-5" />}>Vídeo do Empreendimento</SectionTitle>
+                  <div className="aspect-video rounded-2xl overflow-hidden shadow-sm">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${match[1]}`}
+                      title={`Vídeo de ${emp.name}`}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </section>
+              )
+            })()}
+
+            {/* Tour Virtual */}
+            {emp.virtualTourType !== 'NONE' && emp.virtualTourUrl && (
+              <section>
+                <SectionTitle>Tour Virtual</SectionTitle>
+                <div className="aspect-video rounded-2xl overflow-hidden shadow-sm">
+                  <iframe
+                    src={emp.virtualTourUrl}
+                    title={`Tour virtual de ${emp.name}`}
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                  />
+                </div>
               </section>
             )}
 
@@ -222,7 +258,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
                   {emp.floorPlanImages.length > 0 && (
                     <div>
                       <p className="font-semibold text-[#0D2F5E] mb-3 text-sm">Plantas</p>
-                      <ImageGallery images={emp.floorPlanImages.map(i => ({ url: i.url, alt: i.caption ?? undefined }))} />
+                      <PropertyGallery images={emp.floorPlanImages.map(i => ({ url: i.url, alt: i.caption ?? undefined }))} title={emp.name} />
                     </div>
                   )}
                 </div>
@@ -247,7 +283,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
                     </div>
                   )}
                   {imagesOf('LAZER').length > 0 && (
-                    <ImageGallery images={imagesOf('LAZER').map(i => ({ url: i.url, alt: i.caption ?? undefined }))} />
+                    <PropertyGallery images={imagesOf('LAZER').map(i => ({ url: i.url, alt: i.caption ?? undefined }))} title={emp.name} />
                   )}
                 </div>
               </section>
@@ -321,7 +357,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
                     </div>
                   )}
                   {imagesOf('LOCALIZACAO').length > 0 && (
-                    <ImageGallery images={imagesOf('LOCALIZACAO').map(i => ({ url: i.url, alt: i.caption ?? undefined }))} />
+                    <PropertyGallery images={imagesOf('LOCALIZACAO').map(i => ({ url: i.url, alt: i.caption ?? undefined }))} title={emp.name} />
                   )}
                 </div>
               </section>
@@ -418,27 +454,6 @@ function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: Re
       {icon && <span className="text-[#2E86DE]">{icon}</span>}
       {children}
     </h2>
-  )
-}
-
-function ImageGallery({ images }: { images: { url: string; alt?: string }[] }) {
-  if (images.length === 0) return null
-  if (images.length === 1) {
-    return (
-      <div className="relative rounded-xl overflow-hidden aspect-video bg-gray-100">
-        <Image src={images[0].url} alt={images[0].alt ?? ''} fill sizes="(max-width: 768px) 100vw, 60vw" className="object-cover" />
-      </div>
-    )
-  }
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      {images.map((img, i) => (
-        <div key={img.url + i} className={`relative rounded-xl overflow-hidden bg-gray-100 ${i === 0 ? 'col-span-2 aspect-video' : 'aspect-video'}`}>
-          <Image src={img.url} alt={img.alt ?? ''} fill sizes="(max-width: 640px) 100vw, 50vw"
-            className="object-cover hover:scale-105 transition-transform duration-300" />
-        </div>
-      ))}
-    </div>
   )
 }
 

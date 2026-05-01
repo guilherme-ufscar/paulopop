@@ -58,9 +58,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
       logoUrl:      body.logoUrl      !== undefined ? (body.logoUrl ? String(body.logoUrl) : null) : undefined,
       amenities:    body.amenities    !== undefined ? (body.amenities ? String(body.amenities) : null) : undefined,
       highlights:   body.highlights   !== undefined ? (body.highlights ? String(body.highlights) : null) : undefined,
-      ctaLabel:     body.ctaLabel     !== undefined ? (body.ctaLabel ? String(body.ctaLabel) : null) : undefined,
-      ctaWhatsapp:  body.ctaWhatsapp  !== undefined ? (body.ctaWhatsapp ? String(body.ctaWhatsapp) : null) : undefined,
-      ctaUrl:       body.ctaUrl       !== undefined ? (body.ctaUrl ? String(body.ctaUrl) : null) : undefined,
+      ctaLabel:        body.ctaLabel        !== undefined ? (body.ctaLabel ? String(body.ctaLabel) : null) : undefined,
+      ctaWhatsapp:     body.ctaWhatsapp     !== undefined ? (body.ctaWhatsapp ? String(body.ctaWhatsapp) : null) : undefined,
+      ctaUrl:          body.ctaUrl          !== undefined ? (body.ctaUrl ? String(body.ctaUrl) : null) : undefined,
+      youtubeUrl:      body.youtubeUrl      !== undefined ? (body.youtubeUrl ? String(body.youtubeUrl) : null) : undefined,
+      virtualTourUrl:  body.virtualTourUrl  !== undefined ? (body.virtualTourUrl ? String(body.virtualTourUrl) : null) : undefined,
+      virtualTourType: body.virtualTourType !== undefined ? (body.virtualTourType ? String(body.virtualTourType) : 'NONE') : undefined,
     },
   })
   return NextResponse.json(item)
