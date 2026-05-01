@@ -18,6 +18,7 @@ import { prisma } from '@/lib/prisma'
 import { SearchBar } from '@/components/public/SearchBar'
 import { PropertyCarousel } from '@/components/public/PropertyCarousel'
 import { ContactForm } from '@/components/public/ContactForm'
+import { GoogleReviews } from '@/components/public/GoogleReviews'
 
 export const metadata: Metadata = {
   title: 'Paulo Pop | Corretor de Imoveis',
@@ -488,6 +489,13 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Avaliações Google ─── */}
+      <section className="bg-[#f6f7fb] py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <GoogleReviews />
         </div>
       </section>
 

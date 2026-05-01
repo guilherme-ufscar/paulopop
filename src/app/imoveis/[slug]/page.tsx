@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { PropertyGallery } from '@/components/public/PropertyGallery'
 import { ContactForm } from '@/components/public/ContactForm'
+import { GoogleReviews } from '@/components/public/GoogleReviews'
 import { PropertyCarousel } from '@/components/public/PropertyCarousel'
 import { ViewCounter } from '@/components/public/ViewCounter'
 import { formatCurrency, formatArea } from '@/lib/formatters'
@@ -507,6 +508,9 @@ export default async function PropertyPage({ params }: Props) {
               <PropertyCarousel properties={carouselMap(soldSimilar)} />
             </section>
           )}
+
+          {/* Avaliações Google */}
+          <GoogleReviews className="mt-16 pt-10 border-t border-gray-200" />
         </div>
       </div>
 

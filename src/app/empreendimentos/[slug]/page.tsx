@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { prisma } from '@/lib/prisma'
 import { ContactForm } from '@/components/public/ContactForm'
+import { GoogleReviews } from '@/components/public/GoogleReviews'
 import { formatCurrency } from '@/lib/formatters'
 import type { Metadata } from 'next'
 import { PropertyGallery } from '@/components/public/PropertyGallery'
@@ -381,6 +382,9 @@ export default async function EmpreendimentoPage({ params }: Props) {
                 </div>
               </section>
             )}
+
+            {/* Avaliações Google */}
+            <GoogleReviews />
 
             {/* Corretor */}
             <section>
