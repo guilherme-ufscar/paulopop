@@ -140,6 +140,9 @@ model Property {
   condominiumId         String?
   condominium           Condominium?      @relation(fields: [condominiumId], references: [id])
 
+  empreendimentoId      String?
+  empreendimento        Empreendimento?   @relation(fields: [empreendimentoId], references: [id])
+
   ownerId               String?
   owner                 Contact?          @relation(fields: [ownerId], references: [id])
   ownerName             String?
@@ -636,6 +639,8 @@ model Empreendimento {
   ctaLabel        String?
   ctaWhatsapp     String?
   ctaUrl          String?
+
+  properties      Property[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

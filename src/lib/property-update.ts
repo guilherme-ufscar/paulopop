@@ -14,6 +14,7 @@ const RELATION_FIELDS = [
   'activities',
   'agent',
   'condominium',
+  'empreendimento',
   'owner',
 ] as const
 
@@ -49,7 +50,7 @@ const NULLABLE_DECIMAL_FIELDS = [
   'longitude',
 ] as const
 const NULLABLE_ENUM_FIELDS = ['contractType', 'priceType'] as const
-const NULLABLE_FK_FIELDS = ['condominiumId', 'ownerId', 'secondaryAgentId'] as const
+const NULLABLE_FK_FIELDS = ['condominiumId', 'empreendimentoId', 'ownerId', 'secondaryAgentId'] as const
 const IMMUTABLE_FIELDS = ['createdAt', 'updatedAt', 'id', 'ref', 'slug', 'views', 'favorites'] as const
 
 function parseDate(value: unknown): string | null {

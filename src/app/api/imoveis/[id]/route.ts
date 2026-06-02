@@ -21,6 +21,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
       portals: true,
       agent: { select: { id: true, name: true, email: true, phone: true, whatsapp: true, creci: true, avatarUrl: true } },
       condominium: true,
+      empreendimento: { select: { id: true, name: true } },
       owner: true,
       leads: { orderBy: { createdAt: 'desc' }, take: 10 },
       activities: { orderBy: { createdAt: 'desc' }, take: 20, include: { user: { select: { name: true } } } },
@@ -54,6 +55,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     : []
 
   const data = normalizePropertyUpdateInput(body)
+
+  // Validar FKs opcionais para evitar violação de constraint
+  if (data.condominiumId) {
+    const exists = await prisma.condominium.findUnique({ where: { id: data.condominiumId as string }, select: { id: true } })
+    if (!exists) data.condominiumId = null
+  }
+  if (data.empreendimentoId) {
+    const exists = await prisma.empreendimento.findUnique({ where: { id: data.empreendimentoId as string }, select: { id: true } })
+    if (!exists) data.empreendimentoId = null
+  }
 
   try {
     const property = await prisma.property.update({
