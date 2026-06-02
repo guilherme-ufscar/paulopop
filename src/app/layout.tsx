@@ -22,16 +22,18 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Paulo Pop | Corretor de Imóveis',
+    default: 'Paulo Pop | Corretor de Imóveis no DF',
     template: '%s | Paulo Pop',
   },
-  description: 'Encontre o imóvel dos seus sonhos com Paulo Pop. Especialista em compra, venda e aluguel de imóveis.',
+  description: 'Corretor de imóveis no DF. Compra, venda e aluguel em Samambaia, Águas Claras, Taguatinga e região. Consultoria personalizada com Paulo Pop — CRECI/DF.',
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
     siteName: 'Paulo Pop Imóveis',
   },
 }
+
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [config, cityRows] = await Promise.all([
@@ -47,7 +49,28 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="pt-BR" className={`${playfair.variable} ${dmSans.variable}`}>
+      <head>
+        {GTM_ID && (
+          <Script id="gtm-head" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        )}
+      </head>
       <body className="font-sans antialiased bg-white text-gray-900">
+        {GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
         <Script src="https://elfsightcdn.com/platform.js" strategy="afterInteractive" />
         <Providers>
           {/* Skip link — acessibilidade (5.3) */}

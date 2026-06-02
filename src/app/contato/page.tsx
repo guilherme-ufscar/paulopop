@@ -23,8 +23,35 @@ export default async function ContatoPage() {
     config?.ownerAddress && { icon: <MapPin className="w-5 h-5 text-[#2E86DE]" />, label: 'Endereço', value: config.ownerAddress, href: null },
   ].filter(Boolean)
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paulopop.com.br'
+  const realEstateAgentJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: ownerName,
+    url: siteUrl,
+    ...(config?.ownerPhotoUrl ? { image: config.ownerPhotoUrl } : {}),
+    ...(config?.ownerPhone ? { telephone: config.ownerPhone } : {}),
+    ...(config?.ownerEmail ? { email: config.ownerEmail } : {}),
+    ...(config?.ownerCreci ? { identifier: { '@type': 'PropertyValue', name: 'CRECI', value: config.ownerCreci } } : {}),
+    ...(config?.ownerAddress ? { address: { '@type': 'PostalAddress', streetAddress: config.ownerAddress, addressRegion: 'DF', addressCountry: 'BR' } } : {}),
+    ...(config?.logoUrl ? { logo: config.logoUrl } : {}),
+    ...(config?.ownerCompany ? { worksFor: { '@type': 'Organization', name: config.ownerCompany } } : {}),
+    sameAs: [
+      config?.ownerInstagram,
+      config?.ownerFacebook,
+      config?.ownerLinkedin,
+      config?.ownerYoutube,
+      config?.ownerTwitter,
+    ].filter(Boolean),
+  }
+
   return (
-    <div className="min-h-screen bg-[#F0F4F8]">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
+      />
+      <div className="min-h-screen bg-[#F0F4F8]">
       <div className="bg-[#0D2F5E] py-14 px-4">
         <div className="max-w-7xl mx-auto">
           <p className="text-[#2E86DE] text-xs font-semibold uppercase tracking-widest mb-2">Fale Conosco</p>
@@ -105,5 +132,6 @@ export default async function ContatoPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

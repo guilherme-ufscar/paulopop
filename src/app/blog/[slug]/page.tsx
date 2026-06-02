@@ -38,6 +38,27 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) notFound()
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paulopop.com.br'
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    ...(post.excerpt ? { description: post.excerpt } : {}),
+    ...(post.coverUrl ? { image: post.coverUrl } : {}),
+    url: `${siteUrl}/blog/${post.slug}`,
+    datePublished: post.publishedAt?.toISOString() ?? post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: {
+      '@type': 'Person',
+      name: post.author.name,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Paulo Pop Imóveis',
+      ...(post.author.avatarUrl ? { logo: { '@type': 'ImageObject', url: post.author.avatarUrl } } : {}),
+    },
+  }
+
   // Posts relacionados (mesma categoria, excluindo este)
   const related = await prisma.blogPost.findMany({
     where: {
@@ -52,6 +73,10 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* Hero do post */}
       <section className="bg-[#0D2F5E] py-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">

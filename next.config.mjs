@@ -34,11 +34,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://elfsightcdn.com https://*.elfsightcdn.com https://apps.elfsight.com https://static.elfsight.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://elfsightcdn.com https://*.elfsightcdn.com https://apps.elfsight.com https://static.elfsight.com https://www.googletagmanager.com https://www.google-analytics.com https://*.clarity.ms",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://elfsightcdn.com https://*.elfsightcdn.com https://static.elfsight.com",
               "font-src 'self' https://fonts.gstatic.com https://elfsightcdn.com https://*.elfsightcdn.com",
               "img-src 'self' data: blob: https:",
-              "connect-src 'self' https:",
+              "connect-src 'self' https: https://www.google-analytics.com https://*.clarity.ms https://*.doubleclick.net",
               "frame-src 'self' https://www.youtube.com https://*.youtube.com https://*.google.com https://www.openstreetmap.org https://openstreetmap.org https://elfsightcdn.com https://apps.elfsight.com",
               "media-src 'self' https:",
             ].join('; '),

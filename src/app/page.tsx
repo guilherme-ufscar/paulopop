@@ -204,8 +204,35 @@ export default async function HomePage() {
     },
   ]
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paulopop.com.br'
+
+  const realEstateAgentJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: ownerName,
+    url: siteUrl,
+    ...(ownerPhoto ? { image: ownerPhoto } : {}),
+    ...(config?.ownerPhone ? { telephone: config.ownerPhone } : {}),
+    ...(config?.ownerEmail ? { email: config.ownerEmail } : {}),
+    ...(ownerCreci ? { identifier: { '@type': 'PropertyValue', name: 'CRECI', value: ownerCreci } } : {}),
+    ...(config?.ownerAddress ? { address: { '@type': 'PostalAddress', streetAddress: config.ownerAddress, addressRegion: 'DF', addressCountry: 'BR' } } : {}),
+    ...(config?.logoUrl ? { logo: config.logoUrl } : {}),
+    ...(ownerCompany ? { worksFor: { '@type': 'Organization', name: ownerCompany } } : {}),
+    sameAs: [
+      config?.ownerInstagram,
+      config?.ownerFacebook,
+      config?.ownerLinkedin,
+      config?.ownerYoutube,
+      config?.ownerTwitter,
+    ].filter(Boolean),
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
+      />
       <section className="relative overflow-hidden bg-[#07172f] text-white" aria-label="Hero">
         <div
           className="absolute inset-0"

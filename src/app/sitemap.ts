@@ -6,11 +6,23 @@ import { prisma } from '@/lib/prisma'
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paulopop.com.br'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const properties = await prisma.property.findMany({
-    where: { status: 'ACTIVE', hideOnSite: false },
-    select: { slug: true, updatedAt: true },
-    orderBy: { updatedAt: 'desc' },
-  })
+  const [properties, blogPosts, empreendimentos] = await Promise.all([
+    prisma.property.findMany({
+      where: { status: 'ACTIVE', hideOnSite: false },
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+    }),
+    prisma.blogPost.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { slug: true, updatedAt: true },
+      orderBy: { publishedAt: 'desc' },
+    }),
+    prisma.empreendimento.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+    }),
+  ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -24,6 +36,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/empreendimentos`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
     },
     {
       url: `${BASE_URL}/sobre`,
@@ -46,5 +70,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticRoutes, ...propertyRoutes]
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map(p => ({
+    url: `${BASE_URL}/blog/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+
+  const empreendimentoRoutes: MetadataRoute.Sitemap = empreendimentos.map(e => ({
+    url: `${BASE_URL}/empreendimentos/${e.slug}`,
+    lastModified: e.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }))
+
+  return [...staticRoutes, ...propertyRoutes, ...blogRoutes, ...empreendimentoRoutes]
 }
